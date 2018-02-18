@@ -4,7 +4,10 @@ const int SRCLK_PIN = 4;  // pin 11 on the 75HC595
 
 const int NUM_REGS = 16;  // total registers available
 const int NUM_LEDS = 12;  // number of LEDs on fretboard
-bool led[NUM_LEDS];       // total registers that are used 
+bool led[NUM_LEDS];       // total registers that are used
+
+const bool ON = 1;        // LED state indicator
+const bool OFF = 0;       // LED state indicator
 
 /* 
  * The diagram below shows how LED
@@ -13,12 +16,12 @@ bool led[NUM_LEDS];       // total registers that are used
  *      Fret Number
  *   03     02     01
  * ---------------------
- *|--07--|------|------||
- *|--08--|--02--|------||
- *|--09--|--03--|------||
- *|--10--|--04--|--00--||
- *|--11--|--05--|--01--||
- *|------|--06--|------||
+ *|--05--|------|------||
+ *|--06--|--01--|------||
+ *|--07--|--02--|------||
+ *|------|--03--|------||
+ *|--08--|------|--00--||
+ *|--09--|--04--|------||
  */
 
 void setup(){
@@ -28,29 +31,24 @@ void setup(){
   pinMode(SRCLK_PIN, OUTPUT);
 
   // reset all LEDs
-  turnAllOff();
+  turnAllLeds(OFF);
 }
 
 void loop(){
 }             
 
-// turn all LEDs off
-void turnAllOff(){
-  setAllRegisters(0);
+// turn led[i] OFF or ON
+void turnLed(int i, bool state){
+  led[i] = state;
   writeRegisters();
 }
 
-// turn all LEDs on
-void turnAllOn(){
-  setAllRegisters(1);
-  writeRegisters();
-}
-
-// set all register pins to 'value'
-void setAllRegisters(int value){
+// turn all LEDs OFF or ON
+void turnAllLeds(bool state){
   for(int i = NUM_LEDS; i > 0; i--){
-    led[i] = value;
+    led[i] = state;
   }
+  writeRegisters();
 }
 
 // write to 75HC595's registers from led[] array
