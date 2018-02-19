@@ -5,7 +5,7 @@ const int SRCLK_PIN = 4;  // pin 11 on the 75HC595
 const bool ON = 1;          // LED on-state indicator
 const bool OFF = 0;         // LED off-state indicator
 const int NUM_REGS = 16;    // total registers available
-const int NUM_LEDS = 12;    // number of LEDs on fretboard
+const int NUM_LEDS = 10;    // number of LEDs on fretboard
 bool led[NUM_LEDS];         // total registers that are used
 
 /* 
@@ -52,6 +52,17 @@ const int CHORD_LED_MAPPING[NUM_CHORDS][MAX_LEDS_FOR_CHORD] = {
   {1, 2, -1, -1} // Em_CHORD
 };
 
+// Array for comparison for debug purposes only
+const bool LED_IDEAL[NUM_CHORDS][NUM_LEDS] = {
+// {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+   {0, 1, 0, 0, 0, 1, 0, 0, 0, 1}, // G_CHORD
+   {1, 0, 1, 0, 0, 0, 1, 0, 0, 0}, // C_CHORD
+   {0, 0, 0, 1, 1, 0, 0, 0, 1, 0}, // D_CHORD
+   {1, 0, 0, 1, 0, 0, 1, 1, 0, 0}, // F_CHORD
+   {1, 0, 1, 1, 0, 0, 0, 0, 0, 0}, // Am_CHORD
+   {0, 1, 1, 0, 0, 0, 0, 0, 0, 0}  // Em_CHORD
+};
+
 void setup(){
   // define Arduino pins
   pinMode(SER_PIN, OUTPUT);
@@ -60,9 +71,19 @@ void setup(){
 
   // reset all LEDs
   turnAllLeds(OFF);
+
+  // initialize console for print statements
+  Serial.begin(9600);
 }
 
 void loop(){
+  for (int chord = G_CHORD; chord < NUM_CHORDS; chord++){
+    turnOnChord(chord);
+    debug_chord(chord);
+    Serial.println("Chord done, next one...");
+    delay(500);
+  }
+  delay(10000);
 }
 
 // turn led[i] OFF or ON
@@ -93,6 +114,22 @@ void turnOnChord(int chord){
     }
   }
   writeRegisters();
+}
+
+// print debug statements for correct chord setting
+void debug_chord(int chord){
+  for (int i = 0; i < NUM_LEDS; i++){
+    if (led[i] != LED_IDEAL[chord][i]){
+      Serial.print("Error! Chord ");
+      Serial.print(chord);
+      Serial.print(", led index ");
+      Serial.print(i);
+      Serial.print(", led[i] is ");
+      Serial.print(led[i]);
+      Serial.print(" and LED_IDEAL[chord][i] is ");
+      Serial.println(LED_IDEAL[chord][i]);
+    }
+  }
 }
 
 // write to 75HC595's registers from led[] array
