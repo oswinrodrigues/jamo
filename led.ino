@@ -1,6 +1,6 @@
-const int SER_PIN = 2;    // pin 14 on the 75HC595
+const int SER_PIN = 4;    // pin 14 on the 75HC595
 const int RCLK_PIN = 3;   // pin 12 on the 75HC595
-const int SRCLK_PIN = 4;  // pin 11 on the 75HC595
+const int SRCLK_PIN = 2;  // pin 11 on the 75HC595
 
 const bool ON = 1;          // LED on-state indicator
 const bool OFF = 0;         // LED off-state indicator
@@ -79,11 +79,10 @@ void setup(){
 void loop(){
   for (int chord = G_CHORD; chord < NUM_CHORDS; chord++){
     turnOnChord(chord);
-    debug_chord(chord);
-    Serial.println("Chord done, next one...");
-    delay(500);
+    delay(1500);
   }
-  delay(10000);
+  turnAllLeds(OFF);
+  delay(3000);
 }
 
 // turn led[i] OFF or ON
@@ -107,7 +106,7 @@ void setAllLeds(bool state){
 
 // turn chord ON
 void turnOnChord(int chord){
-  setAllLeds(OFF);
+  turnAllLeds(OFF);
   for (int i = MAX_LEDS_FOR_CHORD-1; i >= 0; i--){
     if (led[CHORD_LED_MAPPING[chord][i]] != -1) {
       led[CHORD_LED_MAPPING[chord][i]] = 1;
