@@ -79,7 +79,7 @@ void setup(){
 void loop(){
   for (int chord = G_CHORD; chord < NUM_CHORDS; chord++){
     turnOnChord(chord);
-    delay(1500);
+    delay(10000);
   }
   turnAllLeds(OFF);
   delay(3000);
