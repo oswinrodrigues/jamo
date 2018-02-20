@@ -78,11 +78,11 @@ void setup(){
 
 void loop(){
   for (int chord = G_CHORD; chord < NUM_CHORDS; chord++){
+    Serial.print("Displaying chord ");
+    Serial.println(chord);
     turnOnChord(chord);
-    delay(10000);
+    delay(3000);
   }
-  turnAllLeds(OFF);
-  delay(3000);
 }
 
 // turn led[i] OFF or ON
@@ -119,14 +119,10 @@ void turnOnChord(int chord){
 void debug_chord(int chord){
   for (int i = 0; i < NUM_LEDS; i++){
     if (led[i] != LED_IDEAL[chord][i]){
-      Serial.print("Error! Chord ");
-      Serial.print(chord);
-      Serial.print(", led index ");
-      Serial.print(i);
-      Serial.print(", led[i] is ");
-      Serial.print(led[i]);
-      Serial.print(" and LED_IDEAL[chord][i] is ");
-      Serial.println(LED_IDEAL[chord][i]);
+      Serial.print("Error! Chord "); Serial.print(chord);
+      Serial.print(", led index "); Serial.print(i);
+      Serial.print(", led[i] actually is "); Serial.print(led[i]);
+      Serial.print(" and ideally is "); Serial.println(LED_IDEAL[chord][i]);
     }
   }
 }
@@ -140,6 +136,8 @@ void writeRegisters(){
   for (int i = NUM_REGS - NUM_LEDS; i > 0; i--){
     digitalWrite(SRCLK_PIN, LOW);
     digitalWrite(SER_PIN, 0);
+    //Serial.print(0);
+    //Serial.print("\t");
     digitalWrite(SRCLK_PIN, HIGH);   
   }
 
@@ -147,8 +145,11 @@ void writeRegisters(){
   for(int i = NUM_LEDS-1; i >= 0; i--){
     digitalWrite(SRCLK_PIN, LOW);
     digitalWrite(SER_PIN, led[i]);
+    //Serial.print(led[i]);
+    //Serial.print("\t");
     digitalWrite(SRCLK_PIN, HIGH);
   }
 
+  //Serial.println();
   digitalWrite(RCLK_PIN, HIGH);
 }
