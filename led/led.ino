@@ -136,8 +136,6 @@ void writeRegisters(){
   for (int i = NUM_REGS - NUM_LEDS; i > 0; i--){
     digitalWrite(SRCLK_PIN, LOW);
     digitalWrite(SER_PIN, 0);
-    //Serial.print(0);
-    //Serial.print("\t");
     digitalWrite(SRCLK_PIN, HIGH);   
   }
 
@@ -145,11 +143,8 @@ void writeRegisters(){
   for(int i = NUM_LEDS-1; i >= 0; i--){
     digitalWrite(SRCLK_PIN, LOW);
     digitalWrite(SER_PIN, led[i]);
-    //Serial.print(led[i]);
-    //Serial.print("\t");
     digitalWrite(SRCLK_PIN, HIGH);
   }
 
-  //Serial.println();
   digitalWrite(RCLK_PIN, HIGH);
 }
