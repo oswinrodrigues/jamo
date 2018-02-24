@@ -116,7 +116,7 @@ void turnOnChord(int chord){
 }
 
 // print debug statements for correct chord setting
-void debug_chord(int chord){
+void debugChord(int chord){
   for (int i = 0; i < NUM_LEDS; i++){
     if (led[i] != LED_IDEAL[chord][i]){
       Serial.print("Error! Chord "); Serial.print(chord);
