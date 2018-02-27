@@ -43,11 +43,11 @@ const int LED_SER_PIN = 4;    // pin 14 on the 75HC595
 const int LED_RCLK_PIN = 3;   // pin 12 on the 75HC595
 const int LED_SRCLK_PIN = 2;  // pin 11 on the 75HC595
 
-const bool LED_ON = 1;          // LED on-state indicator
-const bool LED_OFF = 0;         // LED off-state indicator
-const int LED_NUM_REGS = 16;    // total registers available
-const int LED_NUM_LEDS = 10;    // number of LEDs on fretboard
-bool led[LED_NUM_LEDS];         // total registers that are used
+const bool LED_ON = 1;        // LED on-state indicator
+const bool LED_OFF = 0;       // LED off-state indicator
+const int LED_NUM_REGS = 16;  // total registers available
+const int LED_NUM_LEDS = 10;  // number of LEDs on fretboard
+bool led[LED_NUM_LEDS];       // total registers that are used
 
 /* 
  * The diagram below shows how led[]
@@ -93,17 +93,6 @@ const int LED_CHORD_LED_MAPPING[LED_NUM_CHORDS][LED_MAX_LEDS_FOR_CHORD] = {
   {1, 2, -1, -1} // LED_Em_CHORD
 };
 
-// Array for comparison for debug purposes only
-const bool LED_IDEAL[LED_NUM_CHORDS][LED_NUM_LEDS] = {
-// {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
-   {0, 1, 0, 0, 0, 1, 0, 0, 0, 1}, // LED_G_CHORD
-   {1, 0, 1, 0, 0, 0, 1, 0, 0, 0}, // LED_C_CHORD
-   {0, 0, 0, 1, 1, 0, 0, 0, 1, 0}, // LED_D_CHORD
-   {1, 0, 0, 1, 0, 0, 1, 1, 0, 0}, // LED_F_CHORD
-   {1, 0, 1, 1, 0, 0, 0, 0, 0, 0}, // LED_Am_CHORD
-   {0, 1, 1, 0, 0, 0, 0, 0, 0, 0}  // LED_Em_CHORD
-};
-
 void ledSetup(){
   // define Arduino pins
   pinMode(LED_SER_PIN, OUTPUT);
@@ -139,7 +128,7 @@ void ledSetAll(bool state){
 void ledTurnOnChord(int chord){
   ledTurnAll(LED_OFF);
   for (int i = LED_MAX_LEDS_FOR_CHORD-1; i >= 0; i--){
-    if (led[LED_CHORD_LED_MAPPING[chord][i]] != -1) {
+    if (led[LED_CHORD_LED_MAPPING[chord][i]] != -1){
       led[LED_CHORD_LED_MAPPING[chord][i]] = 1;
     }
   }
