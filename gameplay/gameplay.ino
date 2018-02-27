@@ -4,11 +4,13 @@ void setup(){
 	// led setup
 	ledSetup();
 	// screen setup
+  screenSetup();
 	// fsr setup
 
 	// led initialize
 	ledInitialize();
 	// screen initialize
+  screenInitialize();
 	// fsr initialize
 }
 
@@ -185,26 +187,17 @@ Adafruit_ILI9341 screen_tft = Adafruit_ILI9341(SCREEN_TFT_CS_PIN, SCREEN_TFT_DC_
 const int SCREEN_TS_OHMS = 300;
 TouchScreen screen_ts = TouchScreen(SCREEN_XP_PIN, SCREEN_YP_PIN, SCREEN_XM_PIN, SCREEN_YM_PIN, SCREEN_TS_OHMS);
 
-void screnSetup() {
+void screenSetup(){
   screen_tft.begin();
+  // 1 or 3 for landscape mode
   screen_tft.setRotation(3);
 }
 
-void loop() {
-  TSPoint p = screen_ts.getPoint();
-  int w = screen_tft.width();
-  int h = screen_tft.height();
-
-  // we have some minimum pressure we consider 'valid'
-  // pressure of 0 means no pressing!
-//  if (p.z > screen_ts.pressureThreshhold) {
-//     Serial.print("X = "); Serial.print(double(p.x)*double(w)/1024);
-//     Serial.print("\tY = "); Serial.print(double(p.y)*double(h)/1024);
-//     Serial.print("\tPressure = "); Serial.println(p.z);
-//  }
+void screenInitialize(){
+  screenCallibration();
 }
 
-void screenCallibration(String str) {
+void screenCallibration(String str){
   int w = screen_tft.width();
   int h = screen_tft.height();
   screen_tft.fillScreen(ILI9341_WHITE);
@@ -220,7 +213,7 @@ void screenCallibration(String str) {
   screen_tft.println(str);
 }
 
-void screenSelectMode() {
+void screenSelectMode(){
   int w = screen_tft.width();
   int h = screen_tft.height();
   screen_tft.fillScreen(ILI9341_WHITE);
@@ -231,7 +224,7 @@ void screenSelectMode() {
   screen_tft.println("Select Playing Mode");
 
   // Box 1: Chord
-  //fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
+  // fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
   screen_tft.fillRoundRect((w/8), h/2, (3*w/8), (h/3), 10, ILI9341_MAGENTA);
   screen_tft.drawRoundRect((w/8), h/2, (3*w/8), (h/3), 10, ILI9341_WHITE);
   screen_tft.setCursor((w/8+(3*w/8)/4), (h/2+(h/3)/2));
@@ -239,7 +232,7 @@ void screenSelectMode() {
   screen_tft.println("Chord");
 
   // Box 2: Key
-  //fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
+  // fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
   screen_tft.fillRoundRect((w/2), h/2, (3*w/8), (h/3), 10, ILI9341_MAGENTA);
   screen_tft.drawRoundRect((w/2), h/2, (3*w/8), (h/3), 10, ILI9341_WHITE);
   screen_tft.setCursor((w/2+(3*w/8)/4), (h/2+(h/3)/2));
@@ -247,7 +240,7 @@ void screenSelectMode() {
   screen_tft.println("Key");
 }
 
-String screenGetMode() {
+String screenGetMode(){
   String mode;
   // Box Info
   int w = screen_tft.width();
@@ -269,10 +262,10 @@ String screenGetMode() {
   double x = 320 - double(p.y)*double(w)/1024;
   
   // Determine Selected Mode
-  if (x > x_starting_spot_chord && x < x_starting_spot_chord + box_width && y > y_starting_spot_chord && y < y_starting_spot_chord + box_height && p.z > 0) {
+  if (x > x_starting_spot_chord && x < x_starting_spot_chord + box_width && y > y_starting_spot_chord && y < y_starting_spot_chord + box_height && p.z > 0){
     mode = "Chord";
   }
-  else if (x > x_starting_spot_key && x < x_starting_spot_key + box_width && y > y_starting_spot_key && y < y_starting_spot_key + box_height && p.z > 0) {
+  else if (x > x_starting_spot_key && x < x_starting_spot_key + box_width && y > y_starting_spot_key && y < y_starting_spot_key + box_height && p.z > 0){
     mode = "Key";
   }
   else {
@@ -282,7 +275,7 @@ String screenGetMode() {
   return mode;
 }
 
-void screenSelectChord() {
+void screenSelectChord(){
   int w = screen_tft.width();
   int h = screen_tft.height();
   screen_tft.fillScreen(ILI9341_WHITE);
@@ -307,14 +300,14 @@ void screenSelectChord() {
 }
 
 // Box spots = numbers 0 to 5
-void screenChordModeBoxes(String chord_name, int box_spot) {
+void screenChordModeBoxes(String chord_name, int box_spot){
   // Box Parameters
   int w = screen_tft.width();
   int h = screen_tft.height();
   int x_starting_spot = (w/8)*((box_spot%3)*2+1);
   int y_starting_spot = (h/3);
   // if greater it is the 4th box put on second row
-  if (box_spot > 2) {
+  if (box_spot > 2){
     y_starting_spot = 2*(h/3);
   }
   int box_width = w/4;
@@ -330,7 +323,7 @@ void screenChordModeBoxes(String chord_name, int box_spot) {
   screen_tft.println(chord_name);
 }
 
-String screenGetChord() {
+String screenGetChord(){
   String chord;
   int box_selected = 6;
   // Box Parameters
@@ -343,23 +336,23 @@ String screenGetChord() {
   double y = double(p.x)*double(h)/1024;
   double x = 320-double(p.y)*double(w)/1024;
   
-  for (box_spot = 0; box_spot < 6; box_spot++) {
+  for (box_spot = 0; box_spot < 6; box_spot++){
     int x_starting_spot = (w/8)*((box_spot%3)*2+1);
     int y_starting_spot = (h/3);
     // if greater it is the 4th box put on second row
-    if (box_spot > 2) {
+    if (box_spot > 2){
       y_starting_spot = 2*(h/3);
     }
     int box_width = w/4;
     int box_height = h/3;
 
     // Determine Chord
-    if (x > x_starting_spot && x < x_starting_spot + box_width && y > y_starting_spot && y < y_starting_spot + box_height && p.z > 0) {
+    if (x > x_starting_spot && x < x_starting_spot + box_width && y > y_starting_spot && y < y_starting_spot + box_height && p.z > 0){
       box_selected = box_spot;
     }
   }
 
-  switch(box_selected) {
+  switch(box_selected){
     case 0: chord = "C"; break;
     case 1: chord = "D"; break;
     case 2: chord = "Em"; break;
@@ -368,10 +361,11 @@ String screenGetChord() {
     case 5: chord = "G"; break;
     default: chord = ""; break;
   }
+
   return chord;
 }
 
-void screenSelectKey() {
+void screenSelectKey(){
   int w = screen_tft.width();
   int h = screen_tft.height();
   screen_tft.fillScreen(ILI9341_WHITE);
@@ -382,7 +376,7 @@ void screenSelectKey() {
   screen_tft.println("Choose to Play");
 
   // Box 1: Key of G
-  //fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
+  // fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
   screen_tft.fillRoundRect((w/4), h/2, (w/4), (h/4), 10, ILI9341_MAGENTA);
   screen_tft.drawRoundRect((w/4), h/2, (w/4), (h/4), 10, ILI9341_WHITE);
   screen_tft.setCursor((w/4+(w/4)/2), (h/2+h/16));
@@ -390,7 +384,7 @@ void screenSelectKey() {
   screen_tft.println("G");
 
   // Box 2: Key of C
-  //fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
+  // fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
   screen_tft.fillRoundRect((w/2), h/2, (w/4), (h/4), 10, ILI9341_MAGENTA);
   screen_tft.drawRoundRect((w/2), h/2, (w/4), (h/4), 10, ILI9341_WHITE);
   screen_tft.setCursor((w/2+(w/4)/2), (h/2+h/16));
@@ -398,7 +392,7 @@ void screenSelectKey() {
   screen_tft.println("C");
 }
 
-String screenGetKey() {
+String screenGetKey(){
   String mode;
   // Box Info
   int w = screen_tft.width();
@@ -420,10 +414,10 @@ String screenGetKey() {
   double x = 320 - double(p.y)*double(w)/1024;
   
   // Determine Selected Mode
-  if (x > x_starting_spot_gkey && x < x_starting_spot_gkey + box_width && y > y_starting_spot_gkey && y < y_starting_spot_gkey + box_height && p.z > 0) {
+  if (x > x_starting_spot_gkey && x < x_starting_spot_gkey + box_width && y > y_starting_spot_gkey && y < y_starting_spot_gkey + box_height && p.z > 0){
     mode = "G";
   }
-  else if (x > x_starting_spot_ckey && x < x_starting_spot_ckey + box_width && y > y_starting_spot_ckey && y < y_starting_spot_ckey + box_height && p.z > 0) {
+  else if (x > x_starting_spot_ckey && x < x_starting_spot_ckey + box_width && y > y_starting_spot_ckey && y < y_starting_spot_ckey + box_height && p.z > 0){
     mode = "C";
   }
   else {
@@ -433,7 +427,7 @@ String screenGetKey() {
   return mode;
 }
 
-void screenPlayChord(String chord, String instructions) {
+void screenPlayChord(String chord, String instructions){
   int w = screen_tft.width();
   int h = screen_tft.height();
   screen_tft.fillScreen(ILI9341_WHITE);
@@ -456,7 +450,7 @@ void screenPlayChord(String chord, String instructions) {
   screen_tft.println("MENU");
 }
 
-String screenGetMenuPress() {
+String screenGetMenuPress(){
   String button;
   // Box Info
   int w = screen_tft.width();
@@ -475,7 +469,7 @@ String screenGetMenuPress() {
   double x = 320 - double(p.y)*double(w)/1024;
   
   // Determine Selected Mode
-  if (x > x_starting_spot && x < x_starting_spot + box_width && y > y_starting_spot && y < y_starting_spot + box_height && p.z > 0) {
+  if (x > x_starting_spot && x < x_starting_spot + box_width && y > y_starting_spot && y < y_starting_spot + box_height && p.z > 0){
     button = "Menu";
   }
   else {
@@ -485,7 +479,7 @@ String screenGetMenuPress() {
   return button;
 }
 
-void screenSelectMenuOption() {
+void screenSelectMenuOption(){
   int w = screen_tft.width();
   int h = screen_tft.height();
   screen_tft.fillScreen(ILI9341_WHITE);
@@ -507,7 +501,7 @@ void screenSelectMenuOption() {
   screen_tft.println("Back");
 }
 
-String screenGetMenuOption() {
+String screenGetMenuOption(){
   String option;
   // Box Info
   int w = screen_tft.width();
@@ -529,10 +523,10 @@ String screenGetMenuOption() {
   double x = 320 - double(p.y)*double(w)/1024;
   
   // Determine Selected Mode
-  if (x > x_starting_spot_reselect && x < x_starting_spot_reselect + box_width && y > y_starting_spot_reselect && y < y_starting_spot_reselect + box_height && p.z > 0) {
+  if (x > x_starting_spot_reselect && x < x_starting_spot_reselect + box_width && y > y_starting_spot_reselect && y < y_starting_spot_reselect + box_height && p.z > 0){
     option = "ReSelect";
   }
-  else if (x > x_starting_spot_back && x < x_starting_spot_back + box_width && y > y_starting_spot_back && y < y_starting_spot_back + box_height && p.z > 0) {
+  else if (x > x_starting_spot_back && x < x_starting_spot_back + box_width && y > y_starting_spot_back && y < y_starting_spot_back + box_height && p.z > 0){
     option = "Back";
   }
   else {
@@ -542,7 +536,7 @@ String screenGetMenuOption() {
   return option;
 }
 
-void screenGiveFeedback(String str) {
+void screenGiveFeedback(String str){
   int w = screen_tft.width();
   int h = screen_tft.height();
   screen_tft.fillScreen(ILI9341_WHITE);
@@ -557,8 +551,6 @@ void screenGiveFeedback(String str) {
   screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(2);
   screen_tft.println(str);
 }
-
-
 
 /* * * * * * * * * * *
  * FSR-related code  *
