@@ -168,20 +168,22 @@ void ledWriteRegisters(){
 #include "TouchScreen.h"
 
 // Display (output) pins
-#define SCREEN_TFT_DC 9  // for the Adafruit shield, these are the default.
-#define SCREEN_TFT_CS 10 // for the Adafruit shield, these are the default.
+const int SCREEN_TFT_DC_PIN = 9;  // for the Adafruit shield, these are the default.
+const int SCREEN_TFT_CS_PIN = 10; // for the Adafruit shield, these are the default.
+
 // Touchscreen (input) pins
-#define SCREEN_YP A2     // must be an analog pin, use "An" notation!
-#define SCREEN_XM A3     // must be an analog pin, use "An" notation!
-#define SCREEN_YM 8      // can be a digital pin
-#define SCREEN_XP 9      // can be a digital pin
+const int SCREEN_YP_PIN = A2;     // must be an analog pin, use "An" notation!
+const int SCREEN_XM_PIN = A3;     // must be an analog pin, use "An" notation!
+const int SCREEN_YM_PIN = 8;      // can be a digital pin
+const int SCREEN_XP_PIN = SCREEN_TFT_DC_PIN; // same as DC pin, according to Adafruit
 
 // If using hardware SPI (on Uno, #13, #12, #11) and the above for CS/DC
-Adafruit_ILI9341 screen_tft = Adafruit_ILI9341(SCREEN_TFT_CS, SCREEN_TFT_DC);
+Adafruit_ILI9341 screen_tft = Adafruit_ILI9341(SCREEN_TFT_CS_PIN, SCREEN_TFT_DC_PIN);
 
 // For better pressure precision, need to know the resistance between X+ and
 // X- Use multimeter; for ours, its 300 ohms across the X plate
-TouchScreen screen_ts = TouchScreen(SCREEN_XP, SCREEN_YP, SCREEN_XM, SCREEN_YM, 300);
+const int SCREEN_TS_OHMS = 300;
+TouchScreen screen_ts = TouchScreen(SCREEN_XP_PIN, SCREEN_YP_PIN, SCREEN_XM_PIN, SCREEN_YM_PIN, SCREEN_TS_OHMS);
 
 void screnSetup() {
   screen_tft.begin();
