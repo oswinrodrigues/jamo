@@ -200,6 +200,10 @@ Adafruit_ILI9341 _screen_tft = Adafruit_ILI9341(SCREEN_TFT_CS_PIN, SCREEN_TFT_DC
 const int SCREEN_TS_OHMS = 300;
 TouchScreen _screen_ts = TouchScreen(SCREEN_XP_PIN, SCREEN_YP_PIN, SCREEN_XM_PIN, SCREEN_YM_PIN, SCREEN_TS_OHMS);
 
+// Names for menu buttons
+const int SCREEN_MENU_RESELECT = 0;
+const int SCREEN_MENU_BACK = 1;
+
 void screenSetup(){
   _screen_tft.begin();
   // 1 or 3 for landscape mode
@@ -253,8 +257,7 @@ void screenSelectMode(){
   _screen_tft.println("Key");
 }
 
-String screenGetMode(){
-  String mode;
+int screenGetMode(){
   // Box Info
   int w = _screen_tft.width();
   int h = _screen_tft.height();
@@ -276,16 +279,13 @@ String screenGetMode(){
   
   // Determine Selected Mode
   if (x > x_starting_spot_chord && x < x_starting_spot_chord + box_width && y > y_starting_spot_chord && y < y_starting_spot_chord + box_height && p.z > 0){
-    mode = "Chord";
+    return CHORD_MODE;
   }
   else if (x > x_starting_spot_key && x < x_starting_spot_key + box_width && y > y_starting_spot_key && y < y_starting_spot_key + box_height && p.z > 0){
-    mode = "Key";
-  }
-  else {
-    mode = "";
+    return KEY_MODE;
   }
 
-  return mode;
+  return -1;
 }
 
 void screenSelectChord(){
@@ -336,8 +336,9 @@ void screenChordModeBoxes(String chord_name, int box_spot){
   _screen_tft.println(chord_name);
 }
 
-String screenGetChord(){
-  String chord;
+int screenGetChord(){
+  int chord = -1;
+
   int box_selected = 6;
   // Box Parameters
   int box_spot = 0;
@@ -366,13 +367,13 @@ String screenGetChord(){
   }
 
   switch(box_selected){
-    case 0: chord = "C"; break;
-    case 1: chord = "D"; break;
-    case 2: chord = "Em"; break;
-    case 3: chord = "Am"; break;
-    case 4: chord = "F"; break;
-    case 5: chord = "G"; break;
-    default: chord = ""; break;
+    case 0: chord = C_CHORD;  break;
+    case 1: chord = D_CHORD;  break;
+    case 2: chord = Em_CHORD; break;
+    case 3: chord = Am_CHORD; break;
+    case 4: chord = F_CHORD;  break;
+    case 5: chord = G_CHORD;  break;
+    default: chord = -1;      break;
   }
 
   return chord;
@@ -405,8 +406,7 @@ void screenSelectKey(){
   _screen_tft.println("C");
 }
 
-String screenGetKey(){
-  String key;
+int screenGetKey(){
   // Box Info
   int w = _screen_tft.width();
   int h = _screen_tft.height();
@@ -428,19 +428,27 @@ String screenGetKey(){
   
   // Determine Selected Key
   if (x > x_starting_spot_gkey && x < x_starting_spot_gkey + box_width && y > y_starting_spot_gkey && y < y_starting_spot_gkey + box_height && p.z > 0){
-    key = "G";
+    return G_KEY;
   }
   else if (x > x_starting_spot_ckey && x < x_starting_spot_ckey + box_width && y > y_starting_spot_ckey && y < y_starting_spot_ckey + box_height && p.z > 0){
-    key = "C";
-  }
-  else {
-    key = "";
+    return C_KEY;
   }
 
-  return key;
+  return -1;
 }
 
-void screenPlayChord(String chord, String instructions){
+void screenPlayChord(int chord, String *instructions){
+  String chord_string = "";
+  switch (chord){
+    case G_CHORD: chord_string = "G";   break;
+    case C_CHORD: chord_string = "C";   break;
+    case D_CHORD: chord_string = "D";   break;
+    case F_CHORD: chord_string = "F";   break;
+    case Am_CHORD: chord_string = "Am"; break;
+    case Em_CHORD: chord_string = "Em"; break;
+    default: chord_string = "Unknown";  break;
+  }
+
   int w = _screen_tft.width();
   int h = _screen_tft.height();
   _screen_tft.fillScreen(ILI9341_WHITE);
@@ -448,12 +456,12 @@ void screenPlayChord(String chord, String instructions){
   // Title 
   _screen_tft.setCursor(w/2, 0);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(5);
-  _screen_tft.println(chord);
+  _screen_tft.println(chord_string);
 
   // Message
   _screen_tft.setCursor(w/8, h/2);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println(instructions);
+  _screen_tft.println(&instructions);
 
   // Menu Box
   _screen_tft.fillRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_MAGENTA);
@@ -463,8 +471,7 @@ void screenPlayChord(String chord, String instructions){
   _screen_tft.println("MENU");
 }
 
-String screenGetMenuPress(){
-  String button;
+bool screenGetMenuPress(){
   // Box Info
   int w = _screen_tft.width();
   int h = _screen_tft.height();
@@ -483,13 +490,10 @@ String screenGetMenuPress(){
   
   // Determine Selected Mode
   if (x > x_starting_spot && x < x_starting_spot + box_width && y > y_starting_spot && y < y_starting_spot + box_height && p.z > 0){
-    button = "Menu";
-  }
-  else {
-    button = "";
+    return true;
   }
 
-  return button;
+  return false;
 }
 
 void screenSelectMenuOption(){
@@ -514,8 +518,9 @@ void screenSelectMenuOption(){
   _screen_tft.println("Back");
 }
 
-String screenGetMenuOption(){
-  String option;
+int screenGetMenuOption(){
+  int option = -1;
+
   // Box Info
   int w = _screen_tft.width();
   int h = _screen_tft.height();
@@ -537,19 +542,16 @@ String screenGetMenuOption(){
   
   // Determine Selected Mode
   if (x > x_starting_spot_reselect && x < x_starting_spot_reselect + box_width && y > y_starting_spot_reselect && y < y_starting_spot_reselect + box_height && p.z > 0){
-    option = "ReSelect";
+    option = SCREEN_MENU_RESELECT;
   }
   else if (x > x_starting_spot_back && x < x_starting_spot_back + box_width && y > y_starting_spot_back && y < y_starting_spot_back + box_height && p.z > 0){
-    option = "Back";
-  }
-  else {
-    option = "";
+    option = SCREEN_MENU_BACK;
   }
 
   return option;
 }
 
-void screenGiveFeedback(String str){
+void screenGiveFeedback(String *feedback){
   int w = _screen_tft.width();
   int h = _screen_tft.height();
   _screen_tft.fillScreen(ILI9341_WHITE);
@@ -562,7 +564,7 @@ void screenGiveFeedback(String str){
   // Message
   _screen_tft.setCursor(w/8, h/2);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println(str);
+  _screen_tft.println(&feedback);
 }
 
 /* * * * * * * * * * *
