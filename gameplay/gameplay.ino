@@ -1,4 +1,23 @@
-int current_chord = -1;
+const int CHORD_MODE = 0;
+const int KEY_MODE = 1;
+
+const int G_CHORD = 0;
+const int C_CHORD = 1;
+const int D_CHORD = 2;
+const int F_CHORD = 3;
+const int Am_CHORD = 4;
+const int Em_CHORD = 5;
+const int NUM_CHORDS = 6;
+
+const int G_KEY = 0;
+const int C_KEY = 1;
+const int NUM_KEYS = 2;
+
+const int NUM_CHORDS_IN_KEY = 4;
+const int KEY_CHORDS[NUM_KEYS][NUM_CHORDS_IN_KEY] = {
+  {G_CHORD, C_CHORD, D_CHORD, Em_CHORD}, // G_KEY
+  {C_CHORD, F_CHORD, G_CHORD, Am_CHORD}  // C_KEY
+};
 
 void setup(){
 	// led setup
@@ -78,34 +97,27 @@ bool led[LED_NUM_LEDS];       // total registers that are used
  *|--08--|------|--00--||
  *|--09--|--04--|------||
  *
- * [1, 5, 9]    for LED_G_CHORD
- * [0, 2, 6]    for LED_C_CHORD
- * [3, 4, 8]    for LED_D_CHORD
- * [0, 3, 6, 7] for LED_F_CHORD
- * [0, 2, 3]    for LED_Am_CHORD
- * [1, 2]       for LED_Em_CHORD
+ * [1, 5, 9]    for G_CHORD
+ * [0, 2, 6]    for C_CHORD
+ * [3, 4, 8]    for D_CHORD
+ * [0, 3, 6, 7] for F_CHORD
+ * [0, 2, 3]    for Am_CHORD
+ * [1, 2]       for Em_CHORD
  */
 
-const int LED_G_CHORD = 0;
-const int LED_C_CHORD = 1;
-const int LED_D_CHORD = 2;
-const int LED_F_CHORD = 3;
-const int LED_Am_CHORD = 4;
-const int LED_Em_CHORD = 5;
-const int LED_NUM_CHORDS = 6;
 const int LED_MAX_LEDS_FOR_CHORD = 4;
 
 // For following, consider using a struct instead that has the
 // chord name, led indices and number of leds too
 
-const int LED_CHORD_LED_MAPPING[LED_NUM_CHORDS][LED_MAX_LEDS_FOR_CHORD] = {
+const int LED_CHORD_LED_MAPPING[NUM_CHORDS][LED_MAX_LEDS_FOR_CHORD] = {
   // Use -1 as flag to skip, since not a valid led[] index
-  {1, 5, 9, -1}, // LED_G_CHORD
-  {0, 2, 6, -1}, // LED_C_CHORD
-  {3, 4, 8, -1}, // LED_D_CHORD
-  {0, 3, 6, 7},  // LED_F_CHORD
-  {0, 2, 3, -1}, // LED_Am_CHORD
-  {1, 2, -1, -1} // LED_Em_CHORD
+  {1, 5, 9, -1}, // G_CHORD
+  {0, 2, 6, -1}, // C_CHORD
+  {3, 4, 8, -1}, // D_CHORD
+  {0, 3, 6, 7},  // F_CHORD
+  {0, 2, 3, -1}, // Am_CHORD
+  {1, 2, -1, -1} // Em_CHORD
 };
 
 void ledSetup(){
