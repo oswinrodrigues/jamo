@@ -16,10 +16,23 @@ void setup(){
 
 void loop(){
 	// mode prompt
+  screenSelectMode();
+  String mode = "";
+  while (mode == ""){
+    screenGetMode();
+  }
+
 	// if chord mode, chord prompt
-	// set chord 'sequence' i.e. same chord
+  if (mode == "Chord"){
+    screenSelectChord();
+    // set chord 'sequence' i.e. same chord
+  }
+
 	// else if key mode, key prompt
-	// set chord sequence for given key
+  else if (mode == "Key"){
+    screenSelectKey();
+    // set chord sequence for given key
+  }
 
 	// main logic for chord-playing:
 	// instruct how play is expected
