@@ -36,27 +36,33 @@ void setup(){
 void loop(){
 	// mode prompt
   screenSelectMode();
-  String mode = "";
-  while (mode == ""){
-    screenGetMode();
+  int mode = -1;
+  while (mode == -1){
+    mode = screenGetMode();
   }
 
+  int chord = -1;
 	// if chord mode, chord prompt
-  if (mode == "Chord"){
+  if (mode == CHORD_MODE){
     screenSelectChord();
-    // set chord 'sequence' i.e. same chord
+    while (chord == -1){
+      chord = screenGetChord();
+    }
   }
 
+  int key = -1;
 	// else if key mode, key prompt
-  else if (mode == "Key"){
+  else if (mode == KEY_MODE){
     screenSelectKey();
-    // set chord sequence for given key
+    while (key == -1){
+      key = screenGetKey();
+    }
   }
 
 	// main logic for chord-playing:
 	// instruct how play is expected
 	// command chord to be played
-	ledTurnOnChord(current_chord);
+	ledTurnOnChord(chord);
 	// wait until play is complete
 	// collect sensor data about play
 	// verify play correctness
