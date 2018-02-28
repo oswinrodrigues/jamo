@@ -406,7 +406,7 @@ void screenSelectKey(){
 }
 
 String screenGetKey(){
-  String mode;
+  String key;
   // Box Info
   int w = screen_tft.width();
   int h = screen_tft.height();
@@ -426,18 +426,18 @@ String screenGetKey(){
   double y = double(p.x)*double(h)/1024;
   double x = 320 - double(p.y)*double(w)/1024;
   
-  // Determine Selected Mode
+  // Determine Selected Key
   if (x > x_starting_spot_gkey && x < x_starting_spot_gkey + box_width && y > y_starting_spot_gkey && y < y_starting_spot_gkey + box_height && p.z > 0){
-    mode = "G";
+    key = "G";
   }
   else if (x > x_starting_spot_ckey && x < x_starting_spot_ckey + box_width && y > y_starting_spot_ckey && y < y_starting_spot_ckey + box_height && p.z > 0){
-    mode = "C";
+    key = "C";
   }
   else {
-    mode = "";
+    key = "";
   }
 
-  return mode;
+  return key;
 }
 
 void screenPlayChord(String chord, String instructions){
