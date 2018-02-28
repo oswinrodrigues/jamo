@@ -193,17 +193,17 @@ const int SCREEN_YM_PIN = 8;      // can be a digital pin
 const int SCREEN_XP_PIN = SCREEN_TFT_DC_PIN; // same as DC pin, according to Adafruit
 
 // If using hardware SPI (on Uno, #13, #12, #11) and the above for CS/DC
-Adafruit_ILI9341 screen_tft = Adafruit_ILI9341(SCREEN_TFT_CS_PIN, SCREEN_TFT_DC_PIN);
+Adafruit_ILI9341 _screen_tft = Adafruit_ILI9341(SCREEN_TFT_CS_PIN, SCREEN_TFT_DC_PIN);
 
 // For better pressure precision, need to know the resistance between X+ and
 // X- Use multimeter; for ours, its 300 ohms across the X plate
 const int SCREEN_TS_OHMS = 300;
-TouchScreen screen_ts = TouchScreen(SCREEN_XP_PIN, SCREEN_YP_PIN, SCREEN_XM_PIN, SCREEN_YM_PIN, SCREEN_TS_OHMS);
+TouchScreen _screen_ts = TouchScreen(SCREEN_XP_PIN, SCREEN_YP_PIN, SCREEN_XM_PIN, SCREEN_YM_PIN, SCREEN_TS_OHMS);
 
 void screenSetup(){
-  screen_tft.begin();
+  _screen_tft.begin();
   // 1 or 3 for landscape mode
-  screen_tft.setRotation(3);
+  _screen_tft.setRotation(3);
 }
 
 void screenInitialize(){
@@ -211,53 +211,53 @@ void screenInitialize(){
 }
 
 void screenCallibration(String str){
-  int w = screen_tft.width();
-  int h = screen_tft.height();
-  screen_tft.fillScreen(ILI9341_WHITE);
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
+  _screen_tft.fillScreen(ILI9341_WHITE);
   
   // Title 
-  screen_tft.setCursor(w/8, 0);
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(3);
-  screen_tft.println("Callibrating");
+  _screen_tft.setCursor(w/8, 0);
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
+  _screen_tft.println("Callibrating");
 
   // Message
-  screen_tft.setCursor(w/8, h/2);
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(2);
-  screen_tft.println(str);
+  _screen_tft.setCursor(w/8, h/2);
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
+  _screen_tft.println(str);
 }
 
 void screenSelectMode(){
-  int w = screen_tft.width();
-  int h = screen_tft.height();
-  screen_tft.fillScreen(ILI9341_WHITE);
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
+  _screen_tft.fillScreen(ILI9341_WHITE);
   
   // Title 
-  screen_tft.setCursor(w/8, 0);
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(3);
-  screen_tft.println("Select Playing Mode");
+  _screen_tft.setCursor(w/8, 0);
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
+  _screen_tft.println("Select Playing Mode");
 
   // Box 1: Chord
   // fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
-  screen_tft.fillRoundRect((w/8), h/2, (3*w/8), (h/3), 10, ILI9341_MAGENTA);
-  screen_tft.drawRoundRect((w/8), h/2, (3*w/8), (h/3), 10, ILI9341_WHITE);
-  screen_tft.setCursor((w/8+(3*w/8)/4), (h/2+(h/3)/2));
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(2);
-  screen_tft.println("Chord");
+  _screen_tft.fillRoundRect((w/8), h/2, (3*w/8), (h/3), 10, ILI9341_MAGENTA);
+  _screen_tft.drawRoundRect((w/8), h/2, (3*w/8), (h/3), 10, ILI9341_WHITE);
+  _screen_tft.setCursor((w/8+(3*w/8)/4), (h/2+(h/3)/2));
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
+  _screen_tft.println("Chord");
 
   // Box 2: Key
   // fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
-  screen_tft.fillRoundRect((w/2), h/2, (3*w/8), (h/3), 10, ILI9341_MAGENTA);
-  screen_tft.drawRoundRect((w/2), h/2, (3*w/8), (h/3), 10, ILI9341_WHITE);
-  screen_tft.setCursor((w/2+(3*w/8)/4), (h/2+(h/3)/2));
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(2);
-  screen_tft.println("Key");
+  _screen_tft.fillRoundRect((w/2), h/2, (3*w/8), (h/3), 10, ILI9341_MAGENTA);
+  _screen_tft.drawRoundRect((w/2), h/2, (3*w/8), (h/3), 10, ILI9341_WHITE);
+  _screen_tft.setCursor((w/2+(3*w/8)/4), (h/2+(h/3)/2));
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
+  _screen_tft.println("Key");
 }
 
 String screenGetMode(){
   String mode;
   // Box Info
-  int w = screen_tft.width();
-  int h = screen_tft.height();
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
   // Box 1: Chord
   int x_starting_spot_chord = (w/8);
   int y_starting_spot_chord = (h/2);
@@ -269,7 +269,7 @@ String screenGetMode(){
   int box_height = (h/3);
 
   // Get Point Instance
-  TSPoint p = screen_ts.getPoint();
+  TSPoint p = _screen_ts.getPoint();
   // Rotation and Conversion and Calibration
   double y = double(p.x)*double(h)/1024;
   double x = 320 - double(p.y)*double(w)/1024;
@@ -289,14 +289,14 @@ String screenGetMode(){
 }
 
 void screenSelectChord(){
-  int w = screen_tft.width();
-  int h = screen_tft.height();
-  screen_tft.fillScreen(ILI9341_WHITE);
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
+  _screen_tft.fillScreen(ILI9341_WHITE);
   
   // Title 
-  screen_tft.setCursor(w/8, 0);
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(3);
-  screen_tft.println("Choose to Play");
+  _screen_tft.setCursor(w/8, 0);
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
+  _screen_tft.println("Choose to Play");
 
   // Box 1: C
   screenChordModeBoxes("C", 0);
@@ -315,8 +315,8 @@ void screenSelectChord(){
 // Box spots = numbers 0 to 5
 void screenChordModeBoxes(String chord_name, int box_spot){
   // Box Parameters
-  int w = screen_tft.width();
-  int h = screen_tft.height();
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
   int x_starting_spot = (w/8)*((box_spot%3)*2+1);
   int y_starting_spot = (h/3);
   // if greater it is the 4th box put on second row
@@ -327,13 +327,13 @@ void screenChordModeBoxes(String chord_name, int box_spot){
   int box_height = h/3;
 
   // Create Box
-  screen_tft.fillRoundRect(x_starting_spot, y_starting_spot, box_width, box_height, 10, ILI9341_MAGENTA);
-  screen_tft.drawRoundRect(x_starting_spot, y_starting_spot, box_width, box_height, 10, ILI9341_WHITE);
+  _screen_tft.fillRoundRect(x_starting_spot, y_starting_spot, box_width, box_height, 10, ILI9341_MAGENTA);
+  _screen_tft.drawRoundRect(x_starting_spot, y_starting_spot, box_width, box_height, 10, ILI9341_WHITE);
 
   // Write Inside box (approx center)
-  screen_tft.setCursor((x_starting_spot+box_width/2), (y_starting_spot+box_height/2));
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(2);
-  screen_tft.println(chord_name);
+  _screen_tft.setCursor((x_starting_spot+box_width/2), (y_starting_spot+box_height/2));
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
+  _screen_tft.println(chord_name);
 }
 
 String screenGetChord(){
@@ -341,10 +341,10 @@ String screenGetChord(){
   int box_selected = 6;
   // Box Parameters
   int box_spot = 0;
-  int w = screen_tft.width();
-  int h = screen_tft.height();
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
   // Get Point Instance
-  TSPoint p = screen_ts.getPoint();
+  TSPoint p = _screen_ts.getPoint();
   // Rotation and Conversion and Calibration
   double y = double(p.x)*double(h)/1024;
   double x = 320-double(p.y)*double(w)/1024;
@@ -379,37 +379,37 @@ String screenGetChord(){
 }
 
 void screenSelectKey(){
-  int w = screen_tft.width();
-  int h = screen_tft.height();
-  screen_tft.fillScreen(ILI9341_WHITE);
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
+  _screen_tft.fillScreen(ILI9341_WHITE);
   
   // Title 
-  screen_tft.setCursor(w/8, 0);
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(3);
-  screen_tft.println("Choose to Play");
+  _screen_tft.setCursor(w/8, 0);
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
+  _screen_tft.println("Choose to Play");
 
   // Box 1: Key of G
   // fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
-  screen_tft.fillRoundRect((w/4), h/2, (w/4), (h/4), 10, ILI9341_MAGENTA);
-  screen_tft.drawRoundRect((w/4), h/2, (w/4), (h/4), 10, ILI9341_WHITE);
-  screen_tft.setCursor((w/4+(w/4)/2), (h/2+h/16));
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(3);
-  screen_tft.println("G");
+  _screen_tft.fillRoundRect((w/4), h/2, (w/4), (h/4), 10, ILI9341_MAGENTA);
+  _screen_tft.drawRoundRect((w/4), h/2, (w/4), (h/4), 10, ILI9341_WHITE);
+  _screen_tft.setCursor((w/4+(w/4)/2), (h/2+h/16));
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
+  _screen_tft.println("G");
 
   // Box 2: Key of C
   // fillRoundRect(uint16_t x0, uint16_t y0, uint16_t w, uint16_t h, uint16_t radius, uint16_t ILI9341_MAGENTA);
-  screen_tft.fillRoundRect((w/2), h/2, (w/4), (h/4), 10, ILI9341_MAGENTA);
-  screen_tft.drawRoundRect((w/2), h/2, (w/4), (h/4), 10, ILI9341_WHITE);
-  screen_tft.setCursor((w/2+(w/4)/2), (h/2+h/16));
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(3);
-  screen_tft.println("C");
+  _screen_tft.fillRoundRect((w/2), h/2, (w/4), (h/4), 10, ILI9341_MAGENTA);
+  _screen_tft.drawRoundRect((w/2), h/2, (w/4), (h/4), 10, ILI9341_WHITE);
+  _screen_tft.setCursor((w/2+(w/4)/2), (h/2+h/16));
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
+  _screen_tft.println("C");
 }
 
 String screenGetKey(){
   String key;
   // Box Info
-  int w = screen_tft.width();
-  int h = screen_tft.height();
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
   // Box 1: Key G
   int x_starting_spot_gkey = (w/4);
   int y_starting_spot_gkey = (h/2);
@@ -421,7 +421,7 @@ String screenGetKey(){
   int box_height = (h/4);
 
   // Get Point Instance
-  TSPoint p = screen_ts.getPoint();
+  TSPoint p = _screen_ts.getPoint();
   // Rotation and Conversion and Calibration
   double y = double(p.x)*double(h)/1024;
   double x = 320 - double(p.y)*double(w)/1024;
@@ -441,33 +441,33 @@ String screenGetKey(){
 }
 
 void screenPlayChord(String chord, String instructions){
-  int w = screen_tft.width();
-  int h = screen_tft.height();
-  screen_tft.fillScreen(ILI9341_WHITE);
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
+  _screen_tft.fillScreen(ILI9341_WHITE);
   
   // Title 
-  screen_tft.setCursor(w/2, 0);
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(5);
-  screen_tft.println(chord);
+  _screen_tft.setCursor(w/2, 0);
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(5);
+  _screen_tft.println(chord);
 
   // Message
-  screen_tft.setCursor(w/8, h/2);
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(2);
-  screen_tft.println(instructions);
+  _screen_tft.setCursor(w/8, h/2);
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
+  _screen_tft.println(instructions);
 
   // Menu Box
-  screen_tft.fillRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_MAGENTA);
-  screen_tft.drawRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_WHITE);
-  screen_tft.setCursor((3*w/4+20), (h/16));
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(2);
-  screen_tft.println("MENU");
+  _screen_tft.fillRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_MAGENTA);
+  _screen_tft.drawRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_WHITE);
+  _screen_tft.setCursor((3*w/4+20), (h/16));
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
+  _screen_tft.println("MENU");
 }
 
 String screenGetMenuPress(){
   String button;
   // Box Info
-  int w = screen_tft.width();
-  int h = screen_tft.height();
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
   // Menu Box
   int x_starting_spot = 3*(w/4);
   int y_starting_spot = 0;
@@ -476,7 +476,7 @@ String screenGetMenuPress(){
   int box_height = (h/3);
 
   // Get Point Instance
-  TSPoint p = screen_ts.getPoint();
+  TSPoint p = _screen_ts.getPoint();
   // Rotation and Conversion and Calibration
   double y = double(p.x)*double(h)/1024;
   double x = 320 - double(p.y)*double(w)/1024;
@@ -493,32 +493,32 @@ String screenGetMenuPress(){
 }
 
 void screenSelectMenuOption(){
-  int w = screen_tft.width();
-  int h = screen_tft.height();
-  screen_tft.fillScreen(ILI9341_WHITE);
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
+  _screen_tft.fillScreen(ILI9341_WHITE);
   
   // Re-Select Mode
-  screen_tft.fillRoundRect((w/4), 0, (w/2), (h/2), 10, ILI9341_MAGENTA);
-  screen_tft.drawRoundRect((w/4), 0, (w/2), (h/2), 10, ILI9341_WHITE);
-  screen_tft.setCursor((w/4+(w/4)/8), (0+h/16));
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(3);
-  screen_tft.println("ReSelect");
-  screen_tft.setCursor((w/4+(w/4)/8), (2*h/16+15));
-  screen_tft.println("Mode");
+  _screen_tft.fillRoundRect((w/4), 0, (w/2), (h/2), 10, ILI9341_MAGENTA);
+  _screen_tft.drawRoundRect((w/4), 0, (w/2), (h/2), 10, ILI9341_WHITE);
+  _screen_tft.setCursor((w/4+(w/4)/8), (0+h/16));
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
+  _screen_tft.println("ReSelect");
+  _screen_tft.setCursor((w/4+(w/4)/8), (2*h/16+15));
+  _screen_tft.println("Mode");
 
   // Re-Choose What Is Chord (Chord Mode) Re-Choose Key (Key Mode)
-  screen_tft.fillRoundRect((w/4), h/2, (w/2), (h/2), 10, ILI9341_MAGENTA);
-  screen_tft.drawRoundRect((w/4), h/2, (w/2), (h/2), 10, ILI9341_WHITE);
-  screen_tft.setCursor((w/4+(w/2)/8), (h/2+h/8));
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(3);
-  screen_tft.println("Back");
+  _screen_tft.fillRoundRect((w/4), h/2, (w/2), (h/2), 10, ILI9341_MAGENTA);
+  _screen_tft.drawRoundRect((w/4), h/2, (w/2), (h/2), 10, ILI9341_WHITE);
+  _screen_tft.setCursor((w/4+(w/2)/8), (h/2+h/8));
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
+  _screen_tft.println("Back");
 }
 
 String screenGetMenuOption(){
   String option;
   // Box Info
-  int w = screen_tft.width();
-  int h = screen_tft.height();
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
   // Box 1: Re-Select Option
   int x_starting_spot_reselect = (w/4);
   int y_starting_spot_reselect = 0;
@@ -530,7 +530,7 @@ String screenGetMenuOption(){
   int box_height = (h/2);
 
   // Get Point Instance
-  TSPoint p = screen_ts.getPoint();
+  TSPoint p = _screen_ts.getPoint();
   // Rotation and Conversion and Calibration
   double y = double(p.x)*double(h)/1024;
   double x = 320 - double(p.y)*double(w)/1024;
@@ -550,19 +550,19 @@ String screenGetMenuOption(){
 }
 
 void screenGiveFeedback(String str){
-  int w = screen_tft.width();
-  int h = screen_tft.height();
-  screen_tft.fillScreen(ILI9341_WHITE);
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
+  _screen_tft.fillScreen(ILI9341_WHITE);
   
   // Title 
-  screen_tft.setCursor(w/8, 0);
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(3);
-  screen_tft.println("Feedback");
+  _screen_tft.setCursor(w/8, 0);
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
+  _screen_tft.println("Feedback");
 
   // Message
-  screen_tft.setCursor(w/8, h/2);
-  screen_tft.setTextColor(ILI9341_BLACK);  screen_tft.setTextSize(2);
-  screen_tft.println(str);
+  _screen_tft.setCursor(w/8, h/2);
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
+  _screen_tft.println(str);
 }
 
 /* * * * * * * * * * *
