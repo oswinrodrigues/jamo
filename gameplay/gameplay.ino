@@ -225,10 +225,13 @@ TouchScreen _screen_ts = TouchScreen(SCREEN_XP_PIN, SCREEN_YP_PIN, SCREEN_XM_PIN
 const int SCREEN_MENU_RESELECT = 0;
 const int SCREEN_MENU_BACK = 1;
 
+// The following strings can be edited as required
+// Instructions to player for calibrating FSRs
+String SCREEN_FSR_CALIBRATION = "";
 // Instructions to player when chord displayed
-const String SCREEN_INSTRUCTIONS = "Just do it.";
+String SCREEN_INSTRUCTIONS = "";
 // Feedback to player after chord is played
-const String SCREEN_FEEDBACK = "Keep doing it."
+String SCREEN_FEEDBACK = "";
 
 void screenSetup(){
   _screen_tft.begin();
@@ -240,7 +243,7 @@ void screenInitialize(){
   screenCallibration();
 }
 
-void screenCallibration(String str){
+void screenCallibration(){
   int w = _screen_tft.width();
   int h = _screen_tft.height();
   _screen_tft.fillScreen(ILI9341_WHITE);
@@ -253,7 +256,7 @@ void screenCallibration(String str){
   // Message
   _screen_tft.setCursor(w/8, h/2);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println(str);
+  _screen_tft.println(SCREEN_FSR_CALIBRATION);
 }
 
 void screenSelectMode(){
