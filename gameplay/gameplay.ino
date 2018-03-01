@@ -222,6 +222,11 @@ TouchScreen _screen_ts = TouchScreen(SCREEN_XP_PIN, SCREEN_YP_PIN, SCREEN_XM_PIN
 const int SCREEN_MENU_RESELECT = 0;
 const int SCREEN_MENU_BACK = 1;
 
+// Instructions to player when chord displayed
+const String SCREEN_INSTRUCTIONS = "Just do it.";
+// Feedback to player after chord is played
+const String SCREEN_FEEDBACK = "Keep doing it."
+
 void screenSetup(){
   _screen_tft.begin();
   // 1 or 3 for landscape mode
@@ -455,7 +460,7 @@ int screenGetKey(){
   return -1;
 }
 
-void screenPlayChord(int chord, String *instructions){
+void screenPlayChord(int chord){
   String chord_string = "";
   switch (chord){
     case G_CHORD: chord_string = "G";   break;
@@ -479,7 +484,7 @@ void screenPlayChord(int chord, String *instructions){
   // Message
   _screen_tft.setCursor(w/8, h/2);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println(&instructions);
+  _screen_tft.println(SCREEN_INSTRUCTIONS);
 
   // Menu Box
   _screen_tft.fillRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_MAGENTA);
@@ -569,7 +574,7 @@ int screenGetMenuOption(){
   return option;
 }
 
-void screenGiveFeedback(String *feedback){
+void screenGiveFeedback(){
   int w = _screen_tft.width();
   int h = _screen_tft.height();
   _screen_tft.fillScreen(ILI9341_WHITE);
@@ -582,7 +587,7 @@ void screenGiveFeedback(String *feedback){
   // Message
   _screen_tft.setCursor(w/8, h/2);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println(&feedback);
+  _screen_tft.println(SCREEN_FEEDBACK);
 }
 
 /* * * * * * * * * * *
