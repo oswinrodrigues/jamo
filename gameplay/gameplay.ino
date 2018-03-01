@@ -42,6 +42,9 @@ void loop(){
   }
 
   int chord = -1;
+  int key = -1;
+  int key_chord_counter = 0;
+
 	// if chord mode, chord prompt
   if (mode == CHORD_MODE){
     screenSelectChord();
@@ -49,18 +52,18 @@ void loop(){
       chord = screenGetChord();
     }
   }
-
-  int key = -1;
 	// else if key mode, key prompt
   else if (mode == KEY_MODE){
     screenSelectKey();
     while (key == -1){
       key = screenGetKey();
     }
+    chord = KEY_CHORDS[key][key_chord_counter];
   }
 
 	// main logic for chord-playing:
 	// instruct how play is expected
+  screenPlayChord(chord);
 	// command chord to be played
 	ledTurnOnChord(chord);
 	// wait until play is complete
