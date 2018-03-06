@@ -19,46 +19,65 @@ const int KEY_CHORDS[NUM_KEYS][NUM_CHORDS_IN_KEY] = {
   {C_CHORD, F_CHORD, G_CHORD, Am_CHORD}  // C_KEY
 };
 
+const int PLAY_LIMIT = 10000; // 10 seconds
+const int FEEDBACK_LIMIT = 3000; // 3 seconds
+
+bool back_pressed = false;
+int mode = -1;
+int chord = -1;
+int key = -1;
+int key_chord_counter = 0;
+bool menu_pressed = true;
+bool played_correctly = false;
+int feedback_counter = 0;
+String previous_feedback = "";
+
 void setup(){
 	// led setup
 	ledSetup();
 	// screen setup
   screenSetup();
 	// fsr setup
+  sensorSetup();
 
 	// led initialize
 	ledInitialize();
 	// screen initialize
   screenInitialize();
 	// fsr initialize
+  sensorInitialize();
 }
 
 void loop(){
-	// mode prompt
-  screenSelectMode();
-  int mode = -1;
-  while (mode == -1){
-    mode = screenGetMode();
-  }
-
-  int chord = -1;
-  int key = -1;
-  int key_chord_counter = 0;
-
-	// if chord mode, chord prompt
-  if (mode == CHORD_MODE){
-    screenSelectChord();
-    while (chord == -1){
-      chord = screenGetChord();
+  if (menu_pressed) {
+    if (!back_pressed){
+    	// mode prompt
+      screenSelectMode();
+      mode = -1;
+      while (mode == -1){
+        mode = screenGetMode();
+      }
     }
-  }
-	// else if key mode, key prompt
-  else if (mode == KEY_MODE){
-    screenSelectKey();
-    while (key == -1){
-      key = screenGetKey();
+
+    back_pressed = false;
+
+  	// if chord mode, chord prompt
+    if (mode == CHORD_MODE){
+      screenSelectChord();
+      chord = -1;
+      while (chord == -1){
+        chord = screenGetChord();
+      }
     }
-    chord = KEY_CHORDS[key][key_chord_counter];
+  	// else if key mode, key prompt
+    else if (mode == KEY_MODE){
+      screenSelectKey();
+      key = -1;
+      while (key == -1){
+        key = screenGetKey();
+      }
+      chord = KEY_CHORDS[key][key_chord_counter];
+    }
   }
 
 	// main logic for chord-playing:
@@ -67,15 +86,46 @@ void loop(){
 	// command chord to be played
 	ledTurnOnChord(chord);
 	// wait until play is complete
-	// collect sensor data about play
-	// verify play correctness
-	// give feedback about play
-	// if play is unacceptable, loop back to same chord
-	// else if play is good, next chord in sequence
+  int time_start = millis();
+  played_correctly = false;
+  menu_pressed = false;
+  previous_feedback = "";
+  feedback_counter = 0;
+  while (millis() - time_start <= PLAY_LIMIT + feedback_counter * FEEDBACK_LIMIT && !played_correctly && !menu_pressed) {
+  	// collect sensor data about play
+    // verify play correctness
+    played_correctly = getSensorFeedback(chord);
+    if (SCREEN_FEEDBACK != previous_feedback) {
+      // give feedback about play
+      screenGiveFeedback();
+      previous_feedback = SCREEN_FEEDBACK;
+      delay(FEEDBACK_LIMIT);
+      feedback_counter += 1;
+      screenPlayChord(chord);
+    }
+    menu_pressed = screenGetMenuPress();
+  }
 
-	// all the while:
-	// if 'change chord/key' pressed, loop back to chord/key prompt
-	// else if 'change mode' pressed, loop back to mode prompt
+  // if play is unacceptable, loop back to same chord
+  // else if play is good, next chord in sequence
+  if (played_correctly) {
+    if (mode == KEY_MODE) {
+      key_chord_counter += 1 ;
+      chord = KEY_CHORDS[key][key_chord_counter];
+    }
+  }
+
+  else if (menu_pressed) {
+    screenSelectMenuOption();
+    int menu_option = -1;
+    while (menu_option == -1) {
+  	 menu_option = screenGetMenuOption();
+    }
+    // if 'change chord/key' pressed, loop back to chord/key prompt
+    if (menu_option == SCREEN_MENU_BACK) {
+      back_pressed = true;
+    }
+  	// else if 'change  mode' pressed, loop back to mode prompt
 }
 
 /* * * * * * * * * * *
