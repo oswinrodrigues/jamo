@@ -33,25 +33,25 @@ int feedback_counter = 0;
 String previous_feedback = "";
 
 void setup(){
-	// led setup
-	ledSetup();
-	// screen setup
+  // led setup
+  ledSetup();
+  // screen setup
   screenSetup();
-	// fsr setup
+  // fsr setup
   sensorSetup();
 
-	// led initialize
-	ledInitialize();
-	// screen initialize
+  // led initialize
+  ledInitialize();
+  // screen initialize
   screenInitialize();
-	// fsr initialize
+  // fsr initialize
   sensorInitialize();
 }
 
 void loop(){
   if (menu_pressed) {
     if (!back_pressed){
-    	// mode prompt
+      // mode prompt
       screenSelectMode();
       mode = -1;
       while (mode == -1){
@@ -61,7 +61,7 @@ void loop(){
 
     back_pressed = false;
 
-  	// if chord mode, chord prompt
+    // if chord mode, chord prompt
     if (mode == CHORD_MODE){
       screenSelectChord();
       chord = -1;
@@ -69,7 +69,7 @@ void loop(){
         chord = screenGetChord();
       }
     }
-  	// else if key mode, key prompt
+    // else if key mode, key prompt
     else if (mode == KEY_MODE){
       screenSelectKey();
       key = -1;
@@ -80,19 +80,19 @@ void loop(){
     }
   }
 
-	// main logic for chord-playing:
-	// instruct how play is expected
+  // main logic for chord-playing:
+  // instruct how play is expected
   screenPlayChord(chord);
-	// command chord to be played
-	ledTurnOnChord(chord);
-	// wait until play is complete
+  // command chord to be played
+  ledTurnOnChord(chord);
+  // wait until play is complete
   int time_start = millis();
   played_correctly = false;
   menu_pressed = false;
   previous_feedback = "";
   feedback_counter = 0;
   while (millis() - time_start <= PLAY_LIMIT + feedback_counter * FEEDBACK_LIMIT && !played_correctly && !menu_pressed) {
-  	// collect sensor data about play
+    // collect sensor data about play
     // verify play correctness
     played_correctly = getSensorFeedback(chord);
     if (SCREEN_FEEDBACK != previous_feedback) {
@@ -119,13 +119,13 @@ void loop(){
     screenSelectMenuOption();
     int menu_option = -1;
     while (menu_option == -1) {
-  	 menu_option = screenGetMenuOption();
+     menu_option = screenGetMenuOption();
     }
     // if 'change chord/key' pressed, loop back to chord/key prompt
     if (menu_option == SCREEN_MENU_BACK) {
       back_pressed = true;
     }
-  	// else if 'change  mode' pressed, loop back to mode prompt
+    // else if 'change  mode' pressed, loop back to mode prompt
 }
 
 /* * * * * * * * * * *
