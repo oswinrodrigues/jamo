@@ -32,6 +32,9 @@ bool played_correctly = false;
 int feedback_counter = 0;
 String previous_feedback = "";
 
+const int SCREEN_MENU_BACK = 1;
+String SCREEN_FEEDBACK = "";
+
 void setup(){
   // led setup
   ledSetup();
@@ -126,6 +129,7 @@ void loop(){
       back_pressed = true;
     }
     // else if 'change  mode' pressed, loop back to mode prompt
+  }
 }
 
 /* * * * * * * * * * *
@@ -273,7 +277,7 @@ TouchScreen _screen_ts = TouchScreen(SCREEN_XP_PIN, SCREEN_YP_PIN, SCREEN_XM_PIN
 
 // Names for menu buttons
 const int SCREEN_MENU_RESELECT = 0;
-const int SCREEN_MENU_BACK = 1;
+// const int SCREEN_MENU_BACK = 1;
 
 // The following strings can be edited as required
 // Instructions to player for calibrating FSRs
@@ -281,7 +285,7 @@ String SCREEN_FSR_CALIBRATION = "";
 // Instructions to player when chord displayed
 String SCREEN_INSTRUCTIONS = "";
 // Feedback to player after chord is played
-String SCREEN_FEEDBACK = "";
+// String SCREEN_FEEDBACK = "";
 
 void screenSetup(){
   _screen_tft.begin();
