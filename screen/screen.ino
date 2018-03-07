@@ -14,16 +14,20 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 #include <stdint.h>
 #include "TouchScreen.h"
 
-#define YP A2  // must be an analog pin, use "An" notation!
-#define XM A3  // must be an analog pin, use "An" notation!
+//Old Setup
+//#define YP A2  // must be an analog pin, use "An" notation!
+//#define XM A3  // must be an analog pin, use "An" notation!
 #define YM 8   // can be a digital pin
 #define XP 9   // can be a digital pin
+
+//Actual Setup
+#define YP A4  // must be an analog pin, use "An" notation!
+#define XM A5  // must be an analog pin, use "An" notation!
 
 // For better pressure precision, we need to know the resistance
 // between X+ and X- Use any multimeter to read it
 // For the one we're using, its 300 ohms across the X plate
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
-
 
 void setup() {
   // put your setup code here, to run once:

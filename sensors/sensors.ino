@@ -3,16 +3,23 @@ const int SOFT_POT_PIN_1 = A0; // Pin connected to softpot
 const int SOFT_POT_PIN_2 = A1;
 const int SOFT_POT_PIN_3 = A2;
 
+<<<<<<< HEAD
 const int TOL = 45; //TODO: Verify this tolerance value
+=======
+const int TOL = 35; //TODO: Verify this tolerance value
+>>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
 
 int softPotString_1[] = {960, 750, 570, 440, 0, 0};
 int softPotString_2[] = {940, 730, 0, 400, 730, 0};
 int softPotString_3[] = {0, 730, 0, 0, 0, 0};
 
+<<<<<<< HEAD
 int calibratedSingleStringValues[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 // Array corresponds to {Em, Am, D, G, F}
 int calibratedDoubleStringValues[] = {0, 0, 0, 0, 0};
 
+=======
+>>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
 int chordName = -1;
 
 String SCREEN_FEEDBACK;
@@ -31,12 +38,20 @@ void setup()
   pinMode(SOFT_POT_PIN_2, INPUT);
   pinMode(SOFT_POT_PIN_3, INPUT);
 
+<<<<<<< HEAD
   calibrate();
+=======
+  //calibrate();
+>>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
 }
 
 void loop()
 {
+<<<<<<< HEAD
   chordName = -1;
+=======
+  chordName = 1;
+>>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
   if (chordName != -1)
   {
     getSensorFeedback(chordName);
@@ -50,6 +65,7 @@ void sensorSetup()
   pinMode(SOFT_POT_PIN_3, INPUT);
 }
 
+<<<<<<< HEAD
 bool calibrateSingleString(int noteNumber)
 {
   int softPotADC;
@@ -134,6 +150,13 @@ void calibrate()
     Serial.println(calibratedSingleStringValues[i]);
   }
   
+=======
+void calibrate()
+{
+  calibrateFirstSensor();
+  calibrateSecondSensor();
+  calibrateThirdSensor();
+>>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
 }
 
 void calibrateFirstSensor()
@@ -225,6 +248,7 @@ bool evaluateChord(int expectedChord, int sensorValue1, int sensorValue2, int se
   switch (expectedChord) {
     // G chord
     case G_CHORD:
+<<<<<<< HEAD
       if (abs(sensorValue1) == 0 && abs(sensorValue2 - calibratedSingleStringValues[1]) < TOL && abs(sensorValue3 - calibratedDoubleStringValues[3]) < TOL)
       {
         return true;
@@ -265,6 +289,8 @@ bool evaluateChord(int expectedChord, int sensorValue1, int sensorValue2, int se
   switch (expectedChord) {
     // G chord
     case G_CHORD:
+=======
+>>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
       if (abs(sensorValue1) == 0 && abs(sensorValue2 - softPotString_2[4]) < TOL && abs(sensorValue3 - ((softPotString_3[0] + softPotString_3[5]) / 2)) < TOL)
       {
         return true;
@@ -300,7 +326,10 @@ bool evaluateChord(int expectedChord, int sensorValue1, int sensorValue2, int se
     default:
       return false;
   }
+<<<<<<< HEAD
   */
+=======
+>>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
 }
 
 void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensorValue3)
@@ -312,6 +341,7 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
   // 3. User has placed fingers on incorrect notes
   switch(expectedChord) {
     case G_CHORD:
+<<<<<<< HEAD
       if(abs(sensorValue1) != 0)
       {
         SCREEN_FEEDBACK = "Check the first fret";
@@ -408,6 +438,8 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
   /*
   switch(expectedChord) {
     case G_CHORD:
+=======
+>>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
       if (abs(sensorValue1) != 0)
       {
         SCREEN_FEEDBACK = "Check the first fret";
@@ -501,6 +533,9 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       break;
   }
   Serial.println(SCREEN_FEEDBACK);
+<<<<<<< HEAD
   */
+=======
+>>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
 }
 

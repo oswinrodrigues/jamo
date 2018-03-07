@@ -19,63 +19,154 @@ const int KEY_CHORDS[NUM_KEYS][NUM_CHORDS_IN_KEY] = {
   {C_CHORD, F_CHORD, G_CHORD, Am_CHORD}  // C_KEY
 };
 
-void setup(){
-	// led setup
-	ledSetup();
-	// screen setup
-  screenSetup();
-	// fsr setup
+const int POLL_DELAY = 100; // 0.1 seconds
+const int PLAY_LIMIT = 10000; // 10 seconds
+const int FEEDBACK_LIMIT = 3000; // 3 seconds
 
-	// led initialize
-	ledInitialize();
-	// screen initialize
+unsigned long time_start = 0;
+bool back_pressed = false;
+int mode = -1;
+int chord = -1;
+int key = -1;
+int key_chord_counter = 0;
+bool menu_pressed = true;
+bool played_correctly = false;
+int feedback_counter = 0;
+String previous_feedback = "";
+
+const int SCREEN_MENU_BACK = 1;
+String SCREEN_FEEDBACK = "";
+
+void setup(){
+  // led setup
+  ledSetup();
+  // screen setup
+  screenSetup();
+  // fsr setup
+  sensorSetup();
+
+  // led initialize
+  ledInitialize();
+  // screen initialize
   screenInitialize();
-	// fsr initialize
+  // fsr initialize
+  // TODO: Remove delays!
+  // sensorInitialize();
+
+  // debug code
+  Serial.begin(9600);
 }
 
 void loop(){
-	// mode prompt
-  screenSelectMode();
-  int mode = -1;
-  while (mode == -1){
-    mode = screenGetMode();
-  }
+  Serial.println("Enter main loop again");
+  if (menu_pressed) {
+    Serial.println("Enter prompt logic");
+    if (!back_pressed){
+      Serial.println("Enter mode prompt logic");
+      // mode prompt
+      screenSelectMode();
+      mode = -1;
+      while (mode == -1){
+        mode = screenGetMode();
+        delay(POLL_DELAY);
+      }
+      Serial.println("Got mode");
+    }
 
-  int chord = -1;
-  int key = -1;
-  int key_chord_counter = 0;
+    back_pressed = false;
 
-	// if chord mode, chord prompt
-  if (mode == CHORD_MODE){
-    screenSelectChord();
-    while (chord == -1){
-      chord = screenGetChord();
+    // if chord mode, chord prompt
+    if (mode == CHORD_MODE){
+      Serial.println("Enter chord prompt logic");
+      screenSelectChord();
+      chord = -1;
+      while (chord == -1){
+        chord = screenGetChord();
+        delay(POLL_DELAY);
+      }
+      Serial.println("Got chord");
+    }
+    // else if key mode, key prompt
+    else if (mode == KEY_MODE){
+      Serial.println("Enter key prompt logic");
+      screenSelectKey();
+      key = -1;
+      while (key == -1){
+        key = screenGetKey();
+        delay(POLL_DELAY);
+      }
+      Serial.println("Got key");
+      chord = KEY_CHORDS[key][key_chord_counter];
     }
   }
-	// else if key mode, key prompt
-  else if (mode == KEY_MODE){
-    screenSelectKey();
-    while (key == -1){
-      key = screenGetKey();
-    }
-    chord = KEY_CHORDS[key][key_chord_counter];
-  }
 
-	// main logic for chord-playing:
-	// instruct how play is expected
+  // main logic for chord-playing:
+  // instruct how play is expected
+  Serial.print("Display chord screen"); Serial.println(chord);
   screenPlayChord(chord);
-	// command chord to be played
-	ledTurnOnChord(chord);
-	// wait until play is complete
-	// collect sensor data about play
-	// verify play correctness
-	// give feedback about play
-	// if play is unacceptable, loop back to same chord
-	// else if play is good, next chord in sequence
+  // command chord to be played
+  // TODO: WHY ON GOD'S GREEN EARTH IS THIS A PROBLEM?
+  // ledTurnOnChord(chord);
+  // wait until play is complete
+  Serial.println("Reset all variables");
+  time_start = millis();
+  Serial.print("time_start is "); Serial.println(time_start);
+  played_correctly = false;
+  menu_pressed = false;
+  previous_feedback = "";
+  feedback_counter = 0;
+  Serial.println("Entering main while loop");
+  while (((millis() - time_start) <= (PLAY_LIMIT + feedback_counter * FEEDBACK_LIMIT)) && (!played_correctly) && (!menu_pressed)) {
+    // collect sensor data about play
+    // verify play correctness
+    // TODO: Check why returning false positives
+    // played_correctly = getSensorFeedback(chord);
+    if (SCREEN_FEEDBACK != previous_feedback) {
+      Serial.println("Enter feedback display logic");
+      // give feedback about play
+      screenGiveFeedback();
+      previous_feedback = SCREEN_FEEDBACK;
+      Serial.println("Delay for feedback reading");
+      delay(FEEDBACK_LIMIT);
+      feedback_counter += 1;
+      Serial.println("Display chord again after feedback");
+      screenPlayChord(chord);
+    }
+    menu_pressed = screenGetMenuPress();
+  }
+  Serial.println("Exited main while loop");
+  Serial.print("Duration check is "); Serial.println(PLAY_LIMIT + feedback_counter * FEEDBACK_LIMIT);
+  Serial.print("Elapsed duration is "); Serial.println(millis() - time_start);
+  Serial.print("played_correctly is "); Serial.println(played_correctly);
+  Serial.print("menu_pressed is "); Serial.println(menu_pressed);
 
-	// all the while:
-	// if 'change chord/key' pressed, loop back to chord/key prompt
-	// else if 'change mode' pressed, loop back to mode prompt
+  // if play is unacceptable, loop back to same chord
+  // else if play is good, next chord in sequence
+  if (played_correctly) {
+    Serial.println("Enter played_correctly handling logic");
+    if (mode == KEY_MODE) {
+      Serial.println("Since key mode, increment chord");
+      key_chord_counter += 1 ;
+      chord = KEY_CHORDS[key][key_chord_counter];
+    }
+  }
+
+  else if (menu_pressed) {
+    Serial.println("Enter menu_press handling logic");
+    screenSelectMenuOption();
+    int menu_option = -1;
+    while (menu_option == -1) {
+     menu_option = screenGetMenuOption();
+     delay(POLL_DELAY);
+    }
+    Serial.println("Got menu option press");
+    // if 'change chord/key' pressed, loop back to chord/key prompt
+    if (menu_option == SCREEN_MENU_BACK) {
+      Serial.println("Back button in menu was pressed");
+      back_pressed = true;
+    }
+    // else if 'change  mode' pressed, loop back to mode prompt
+  }
 }
 
 /* * * * * * * * * * *
@@ -208,8 +299,8 @@ const int SCREEN_TFT_DC_PIN = 9;  // for the Adafruit shield, these are the defa
 const int SCREEN_TFT_CS_PIN = 10; // for the Adafruit shield, these are the default.
 
 // Touchscreen (input) pins
-const int SCREEN_YP_PIN = A2;     // must be an analog pin, use "An" notation!
-const int SCREEN_XM_PIN = A3;     // must be an analog pin, use "An" notation!
+const int SCREEN_YP_PIN = A4;     // must be an analog pin, use "An" notation!
+const int SCREEN_XM_PIN = A5;     // must be an analog pin, use "An" notation!
 const int SCREEN_YM_PIN = 8;      // can be a digital pin
 const int SCREEN_XP_PIN = SCREEN_TFT_DC_PIN; // same as DC pin, according to Adafruit
 
@@ -223,7 +314,7 @@ TouchScreen _screen_ts = TouchScreen(SCREEN_XP_PIN, SCREEN_YP_PIN, SCREEN_XM_PIN
 
 // Names for menu buttons
 const int SCREEN_MENU_RESELECT = 0;
-const int SCREEN_MENU_BACK = 1;
+// const int SCREEN_MENU_BACK = 1;
 
 // The following strings can be edited as required
 // Instructions to player for calibrating FSRs
@@ -231,7 +322,7 @@ String SCREEN_FSR_CALIBRATION = "";
 // Instructions to player when chord displayed
 String SCREEN_INSTRUCTIONS = "";
 // Feedback to player after chord is played
-String SCREEN_FEEDBACK = "";
+// String SCREEN_FEEDBACK = "";
 
 void screenSetup(){
   _screen_tft.begin();
@@ -311,7 +402,7 @@ int screenGetMode(){
     return CHORD_MODE;
   }
   else if (x > x_starting_spot_key && x < x_starting_spot_key + box_width && y > y_starting_spot_key && y < y_starting_spot_key + box_height && p.z > 0){
-    return KEY_MODE;
+    return KEY_MODE; 
   }
 
   return -1;
@@ -599,3 +690,258 @@ void screenGiveFeedback(){
 /* * * * * * * * * * *
  * FSR-related code  *
  * * * * * * * * * * */
+
+// Pins connected to softpot
+const int SOFT_POT_PIN_1 = A0;
+const int SOFT_POT_PIN_2 = A1;
+const int SOFT_POT_PIN_3 = A2;
+
+const int TOL = 35; // TODO: Verify this tolerance value
+
+int softPotString_1[] = {960, 750, 570, 440, 0, 0};
+int softPotString_2[] = {940, 730, 0, 400, 730, 0};
+int softPotString_3[] = {0, 730, 0, 0, 0, 0};
+
+void sensorSetup()
+{
+  pinMode(SOFT_POT_PIN_1, INPUT);
+  pinMode(SOFT_POT_PIN_2, INPUT);
+  pinMode(SOFT_POT_PIN_3, INPUT);
+}
+
+void sensorInitialize()
+{
+  calibrateFirstSensor();
+  calibrateSecondSensor();
+  calibrateThirdSensor();
+}
+
+void calibrateFirstSensor()
+{
+  int softPotADC;
+
+  for (int i = 0; i < 6; i++)
+  {
+    softPotADC = 0;
+    while (softPotADC == 0)
+    {
+      softPotADC = analogRead(SOFT_POT_PIN_1);
+    }
+    softPotString_1[i] = softPotADC;
+    delay(1000);
+  }
+  // Serial.print("Done calibrating 1");
+}
+
+void calibrateSecondSensor()
+{
+  int softPotADC;
+
+  for (int i = 0; i < 6; i++)
+  {
+    softPotADC = 0;
+    while (softPotADC == 0)
+    {
+      softPotADC = analogRead(SOFT_POT_PIN_2);
+    }
+    softPotString_2[i] = softPotADC;
+    delay(1000);
+  }
+  // Serial.print("Done calibrating 2");
+}
+
+void calibrateThirdSensor()
+{
+  int softPotADC;
+
+  for (int i = 0; i < 6; i++)
+  {
+    softPotADC = 0;
+    while (softPotADC == 0)
+    {
+      softPotADC = analogRead(SOFT_POT_PIN_3);
+    }
+    softPotString_3[i] = softPotADC;
+    delay(1000);
+  }
+  // Serial.print("Done calibrating 3");
+}
+
+bool getSensorFeedback(int expectedChord)
+{
+  int softPotADC[] = {
+    analogRead(SOFT_POT_PIN_1), analogRead(SOFT_POT_PIN_2), analogRead(SOFT_POT_PIN_3)
+  };
+
+  int softPotADC1 = analogRead(SOFT_POT_PIN_1);
+  int softPotADC2 = analogRead(SOFT_POT_PIN_2);
+  int softPotADC3 = analogRead(SOFT_POT_PIN_3);
+  // Serial.println(softPotADC3);
+  delay(100);
+  bool success = evaluateChord(expectedChord, softPotADC1, softPotADC2, softPotADC3);
+  /*
+  if(success)
+  {
+    delay(100);
+    success = evaluateChord(expectedChord, softPotADC[0], softPotADC[1], softPotADC[2]);
+  }
+  */
+
+  if(success)
+  {
+    SCREEN_FEEDBACK = "Good Job";
+    // Serial.println("Good Job");
+    return true;
+  }
+  else
+  {
+    findError(expectedChord, softPotADC1, softPotADC2, softPotADC3);
+    return false;
+  }
+}
+
+bool evaluateChord(int expectedChord, int sensorValue1, int sensorValue2, int sensorValue3)
+{
+  switch (expectedChord) {
+    // G chord
+    case G_CHORD:
+      if (abs(sensorValue1) == 0 && abs(sensorValue2 - softPotString_2[4]) < TOL && abs(sensorValue3 - ((softPotString_3[0] + softPotString_3[5]) / 2)) < TOL)
+      {
+        return true;
+      }
+      return false;
+    // C chord
+    // TODO
+    case C_CHORD:
+      // Serial.println(sensorValue3);
+      if (abs(sensorValue1 - softPotString_1[1]) < TOL && abs(sensorValue2 - softPotString_2[1]) < TOL && abs(sensorValue3 - softPotString_3[1]) < TOL)
+        return true;
+      return false;
+    // D chord
+    case D_CHORD:
+      if (abs(sensorValue1) == 0 && abs(sensorValue2 - ((softPotString_2[0] + softPotString_2[2]) / 2)) < TOL && abs(sensorValue3 - softPotString_3[1]) < TOL)
+        return true;
+      return false;
+    // F chord
+    case F_CHORD:
+      if (abs(sensorValue1 - softPotString_1[1]) < TOL && abs(sensorValue2 - softPotString_2[2]) < TOL && abs(sensorValue3 - ( (softPotString_3[3] + softPotString_3[4]) / 2)) < TOL)
+        return true;
+      return false;
+    // Am Chord
+    case Am_CHORD:
+      if (abs(sensorValue1 - softPotString_1[1]) < TOL && abs(sensorValue2 - ((softPotString_2[2] + softPotString_2[3]) / 2)) < TOL && abs(sensorValue3) == 0)
+        return true;
+      return false;
+    // Em chord
+    case Em_CHORD:
+      if (abs(sensorValue1) == 0 && abs(sensorValue2 - ((softPotString_2[3] + softPotString_2[4]) / 2)) < TOL && abs(sensorValue3) == 0)
+        return true;
+      return false;
+    default:
+      return false;
+  }
+}
+
+void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensorValue3)
+{
+  // Go through every case for each possible chord
+  // Three cases:
+  // 1. User has not placed fingers on any strings
+  // 2. User has placed fingers on some of the correct notes
+  // 3. User has placed fingers on incorrect notes
+  switch(expectedChord) {
+    case G_CHORD:
+      if (abs(sensorValue1) != 0)
+      {
+        SCREEN_FEEDBACK = "Check the first fret";
+      }
+      if(abs(sensorValue2 - softPotString_2[4]) > TOL)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
+      }
+      if(abs(sensorValue3 - ((softPotString_3[0] + softPotString_3[5]) / 2)) > TOL)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
+      }
+      break;
+    // C chord
+    // TODO
+    case C_CHORD:
+      if (abs(sensorValue1 - softPotString_1[1]) > TOL)
+      {
+        SCREEN_FEEDBACK = "Check the first fret";
+      }
+      if(abs(sensorValue2 - softPotString_2[1]) > TOL)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
+      }
+      if(abs(sensorValue3 - softPotString_3[1]) > TOL)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
+        // Serial.println(softPotString_3[1]);
+        // Serial.println(sensorValue3);
+      }
+      break;
+    // D chord
+    case D_CHORD:
+      if (abs(sensorValue1) != 0)
+      {
+        SCREEN_FEEDBACK = "Check the first fret";
+      }
+      if(abs(sensorValue2 - ((softPotString_2[0] + softPotString_2[2]) / 2)) > TOL)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
+      }
+      if(abs(sensorValue3 - softPotString_3[1]) > TOL)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
+      }
+      break;
+    // F chord
+    case F_CHORD:
+      if (abs(sensorValue1 - softPotString_1[1]) > TOL)
+      {
+        SCREEN_FEEDBACK = "Check the first fret";
+      }
+      if(abs(sensorValue2 - softPotString_2[2]) > TOL)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
+      }
+      if(abs(sensorValue3 - ( (softPotString_3[3] + softPotString_3[4]) / 2)) > TOL)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
+      }
+      break;
+    // Am chord
+    case Am_CHORD:
+      if (abs(sensorValue1 - softPotString_1[1]) > TOL)
+      {
+        SCREEN_FEEDBACK = "Check the first fret";
+      }
+      if(abs(sensorValue2 - ((softPotString_2[2] + softPotString_2[3]) / 2)) > TOL)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
+      }
+      if(abs(sensorValue3) != 0)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
+      }
+      break;
+    // Em chord
+    case Em_CHORD:
+      if (abs(sensorValue1) != 0)
+      {
+        SCREEN_FEEDBACK = "Check the first fret";
+      }
+      if(abs(sensorValue2 - ((softPotString_2[3] + softPotString_2[4]) / 2)) > TOL)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
+      }
+      if(abs(sensorValue3) != 0)
+      {
+        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
+      }
+      break;
+  }
+  // Serial.println(SCREEN_FEEDBACK);
+}
