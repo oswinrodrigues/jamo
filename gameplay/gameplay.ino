@@ -19,9 +19,11 @@ const int KEY_CHORDS[NUM_KEYS][NUM_CHORDS_IN_KEY] = {
   {C_CHORD, F_CHORD, G_CHORD, Am_CHORD}  // C_KEY
 };
 
+const int POLL_DELAY = 100; // 0.1 seconds
 const int PLAY_LIMIT = 10000; // 10 seconds
 const int FEEDBACK_LIMIT = 3000; // 3 seconds
 
+unsigned long time_start = 0;
 bool back_pressed = false;
 int mode = -1;
 int chord = -1;
@@ -48,84 +50,119 @@ void setup(){
   // screen initialize
   screenInitialize();
   // fsr initialize
-  sensorInitialize();
+  // TODO: Remove delays!
+  // sensorInitialize();
+
+  // debug code
+  Serial.begin(9600);
 }
 
 void loop(){
+  Serial.println("Enter main loop again");
   if (menu_pressed) {
+    Serial.println("Enter prompt logic");
     if (!back_pressed){
+      Serial.println("Enter mode prompt logic");
       // mode prompt
       screenSelectMode();
       mode = -1;
       while (mode == -1){
         mode = screenGetMode();
+        delay(POLL_DELAY);
       }
+      Serial.println("Got mode");
     }
 
     back_pressed = false;
 
     // if chord mode, chord prompt
     if (mode == CHORD_MODE){
+      Serial.println("Enter chord prompt logic");
       screenSelectChord();
       chord = -1;
       while (chord == -1){
         chord = screenGetChord();
+        delay(POLL_DELAY);
       }
+      Serial.println("Got chord");
     }
     // else if key mode, key prompt
     else if (mode == KEY_MODE){
+      Serial.println("Enter key prompt logic");
       screenSelectKey();
       key = -1;
       while (key == -1){
         key = screenGetKey();
+        delay(POLL_DELAY);
       }
+      Serial.println("Got key");
       chord = KEY_CHORDS[key][key_chord_counter];
     }
   }
 
   // main logic for chord-playing:
   // instruct how play is expected
+  Serial.print("Display chord screen"); Serial.println(chord);
   screenPlayChord(chord);
   // command chord to be played
-  ledTurnOnChord(chord);
+  // TODO: WHY ON GOD'S GREEN EARTH IS THIS A PROBLEM?
+  // ledTurnOnChord(chord);
   // wait until play is complete
-  int time_start = millis();
+  Serial.println("Reset all variables");
+  time_start = millis();
+  Serial.print("time_start is "); Serial.println(time_start);
   played_correctly = false;
   menu_pressed = false;
   previous_feedback = "";
   feedback_counter = 0;
-  while (millis() - time_start <= PLAY_LIMIT + feedback_counter * FEEDBACK_LIMIT && !played_correctly && !menu_pressed) {
+  Serial.println("Entering main while loop");
+  while (((millis() - time_start) <= (PLAY_LIMIT + feedback_counter * FEEDBACK_LIMIT)) && (!played_correctly) && (!menu_pressed)) {
     // collect sensor data about play
     // verify play correctness
-    played_correctly = getSensorFeedback(chord);
+    // TODO: Check why returning false positives
+    // played_correctly = getSensorFeedback(chord);
     if (SCREEN_FEEDBACK != previous_feedback) {
+      Serial.println("Enter feedback display logic");
       // give feedback about play
       screenGiveFeedback();
       previous_feedback = SCREEN_FEEDBACK;
+      Serial.println("Delay for feedback reading");
       delay(FEEDBACK_LIMIT);
       feedback_counter += 1;
+      Serial.println("Display chord again after feedback");
       screenPlayChord(chord);
     }
     menu_pressed = screenGetMenuPress();
   }
+  Serial.println("Exited main while loop");
+  Serial.print("Duration check is "); Serial.println(PLAY_LIMIT + feedback_counter * FEEDBACK_LIMIT);
+  Serial.print("Elapsed duration is "); Serial.println(millis() - time_start);
+  Serial.print("played_correctly is "); Serial.println(played_correctly);
+  Serial.print("menu_pressed is "); Serial.println(menu_pressed);
 
   // if play is unacceptable, loop back to same chord
   // else if play is good, next chord in sequence
   if (played_correctly) {
+    Serial.println("Enter played_correctly handling logic");
     if (mode == KEY_MODE) {
+      Serial.println("Since key mode, increment chord");
       key_chord_counter += 1 ;
       chord = KEY_CHORDS[key][key_chord_counter];
     }
   }
 
   else if (menu_pressed) {
+    Serial.println("Enter menu_press handling logic");
     screenSelectMenuOption();
     int menu_option = -1;
     while (menu_option == -1) {
      menu_option = screenGetMenuOption();
+     delay(POLL_DELAY);
     }
+    Serial.println("Got menu option press");
     // if 'change chord/key' pressed, loop back to chord/key prompt
     if (menu_option == SCREEN_MENU_BACK) {
+      Serial.println("Back button in menu was pressed");
       back_pressed = true;
     }
     // else if 'change  mode' pressed, loop back to mode prompt
@@ -262,8 +299,8 @@ const int SCREEN_TFT_DC_PIN = 9;  // for the Adafruit shield, these are the defa
 const int SCREEN_TFT_CS_PIN = 10; // for the Adafruit shield, these are the default.
 
 // Touchscreen (input) pins
-const int SCREEN_YP_PIN = A2;     // must be an analog pin, use "An" notation!
-const int SCREEN_XM_PIN = A3;     // must be an analog pin, use "An" notation!
+const int SCREEN_YP_PIN = A4;     // must be an analog pin, use "An" notation!
+const int SCREEN_XM_PIN = A5;     // must be an analog pin, use "An" notation!
 const int SCREEN_YM_PIN = 8;      // can be a digital pin
 const int SCREEN_XP_PIN = SCREEN_TFT_DC_PIN; // same as DC pin, according to Adafruit
 
@@ -365,7 +402,7 @@ int screenGetMode(){
     return CHORD_MODE;
   }
   else if (x > x_starting_spot_key && x < x_starting_spot_key + box_width && y > y_starting_spot_key && y < y_starting_spot_key + box_height && p.z > 0){
-    return KEY_MODE;
+    return KEY_MODE; 
   }
 
   return -1;
