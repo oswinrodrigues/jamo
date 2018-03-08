@@ -108,7 +108,7 @@ void setAllLeds(bool state){
 void turnOnChord(int chord){
   turnAllLeds(OFF);
   for (int i = MAX_LEDS_FOR_CHORD-1; i >= 0; i--){
-    if (led[CHORD_LED_MAPPING[chord][i]] != -1) {
+    if (CHORD_LED_MAPPING[chord][i] != -1) {
       led[CHORD_LED_MAPPING[chord][i]] = 1;
     }
   }
