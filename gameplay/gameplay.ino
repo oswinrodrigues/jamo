@@ -58,7 +58,7 @@ void setup(){
 }
 
 void loop(){
-  Serial.println("Enter main loop again");
+  Serial.println("Enter main loop");
   if (menu_pressed) {
     Serial.println("Enter prompt logic");
     if (!back_pressed){
@@ -102,11 +102,13 @@ void loop(){
 
   // main logic for chord-playing:
   // instruct how play is expected
-  Serial.print("Display chord screen"); Serial.println(chord);
+
+  Serial.print("Display chord screen "); Serial.println(chord);
   screenPlayChord(chord);
   // command chord to be played
   // TODO: WHY ON GOD'S GREEN EARTH IS THIS A PROBLEM?
-  // ledTurnOnChord(chord);
+  ledTurnOnChord(chord);
+
   // wait until play is complete
   Serial.println("Reset all variables");
   time_start = millis();
@@ -115,6 +117,7 @@ void loop(){
   menu_pressed = false;
   previous_feedback = "";
   feedback_counter = 0;
+
   Serial.println("Entering main while loop");
   while (((millis() - time_start) <= (PLAY_LIMIT + feedback_counter * FEEDBACK_LIMIT)) && (!played_correctly) && (!menu_pressed)) {
     // collect sensor data about play
@@ -254,8 +257,8 @@ void ledSetAll(bool state){
 // turn chord ON
 void ledTurnOnChord(int chord){
   ledTurnAll(LED_OFF);
-  for (int i = LED_MAX_LEDS_FOR_CHORD-1; i >= 0; i--){
-    if (led[LED_CHORD_LED_MAPPING[chord][i]] != -1){
+  for (int i = 0; i < LED_MAX_LEDS_FOR_CHORD; i++){
+    if (LED_CHORD_LED_MAPPING[chord][i] != -1){
       led[LED_CHORD_LED_MAPPING[chord][i]] = 1;
     }
   }
