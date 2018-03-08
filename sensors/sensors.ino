@@ -346,11 +346,11 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedSingleStringValues[1]) < TOL)
+      if(abs(sensorValue2 - calibratedSingleStringValues[1]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
-      if(abs(sensorValue3 - calibratedDoubleStringValues[3]) < TOL)
+      if(abs(sensorValue3 - calibratedDoubleStringValues[3]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
       }
@@ -358,15 +358,15 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
     // C chord
     //TODO
     case C_CHORD:
-      if(abs(sensorValue1 - calibratedSingleStringValues[0]) < TOL)
+      if(abs(sensorValue1 - calibratedSingleStringValues[0]) > TOL)
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedSingleStringValues[2]) < TOL)
+      if(abs(sensorValue2 - calibratedSingleStringValues[2]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
-      if(abs(sensorValue3 - calibratedSingleStringValues[6]) < TOL)
+      if(abs(sensorValue3 - calibratedSingleStringValues[6]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
         //Serial.println(softPotString_3[1]);
@@ -379,37 +379,37 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedDoubleStringValues[2]) < TOL)
+      if(abs(sensorValue2 - calibratedDoubleStringValues[2]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
-      if(abs(sensorValue3 - calibratedSingleStringValues[8]) < TOL)
+      if(abs(sensorValue3 - calibratedSingleStringValues[8]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
       }
       break;
     // F chord
     case F_CHORD:
-      if(abs(sensorValue1 - calibratedSingleStringValues[0]) < TOL)
+      if(abs(sensorValue1 - calibratedSingleStringValues[0]) > TOL)
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedSingleStringValues[3]) < TOL)
+      if(abs(sensorValue2 - calibratedSingleStringValues[3]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
-      if(abs(sensorValue3 - calibratedDoubleStringValues[4]) < TOL)
+      if(abs(sensorValue3 - calibratedDoubleStringValues[4]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
       }
       break;
     // Am Chord
     case Am_CHORD:
-      if(abs(sensorValue1 - calibratedSingleStringValues[0]) < TOL)
+      if(abs(sensorValue1 - calibratedSingleStringValues[0]) > TOL)
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedDoubleStringValues[1]) < TOL)
+      if(abs(sensorValue2 - calibratedDoubleStringValues[1]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
@@ -424,7 +424,7 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedDoubleStringValues[0]) < TOL)
+      if(abs(sensorValue2 - calibratedDoubleStringValues[0]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }

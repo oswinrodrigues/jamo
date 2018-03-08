@@ -714,18 +714,67 @@ void sensorSetup()
 
 void sensorInitialize()
 {
-  //calibrateFirstSensor();
-  //calibrateSecondSensor();
-  //calibrateThirdSensor();
-
+  // Calibrate all single notes
   for(int i = 0; i < 10; i++)
   {
     bool success = false;
-    while(success == false) {
+    SCREEN_FSR_CALIBRATION = "Place your finger on LED #" + (i + 1);
+    screenCallibration();
+    // Turn on LED #i
+    ledTurn(i, LED_ON);
+    int time_on = millis();
+    while(!success || (millis() - time_on) < 1000) {
       success = calibrateSingleString(i);
     }
-    Serial.println("Fret " + i);
-    Serial.println(calibratedSingleStringValues[i]);
+    // Turn off LED #i
+    ledTurn(i, LED_OFF);
+    SCREEN_FSR_CALIBRATION = "Take your finger off LED #" + (i + 1);
+    screenCallibration();
+    int time_off = millis();
+    while(success || (millis() - time_off) < 500) {
+      success = calibrateSingleString(i);
+    }
+  }
+  // Calibrate all necessary intervals
+  int note1 = -1;
+  int note2 = -1;
+  String calibrateText = "Place your fingers on LEDs #";
+  String textAdding = " and #";
+  for(int i = 0; i < 5; i++)
+  {
+    bool success = false;
+    if(i == 3)
+    {
+      note1 = 5;
+      note2 = 9;
+    }
+    else if(i == 4)
+    {
+      note1 = 6;
+      note2 = 7;
+    }
+    else
+    {
+      note1 = i + 1;
+      note2 = i + 2;
+    }
+    SCREEN_FSR_CALIBRATION = calibrateText + note1 + textAdding + note2;
+    screenCallibration();
+    // Turn on LEDs #note1 and #note2
+    ledTurn(note1, LED_ON);
+    ledTurn(note2, LED_ON);
+    int time_on2 = millis();
+    while(!success || (millis() - time_on2) < 2500) {
+      success = calibrateDoubleString(note1, note2);
+    }
+    // Turn off all LEDs
+    ledTurnAll(LED_OFF);
+    SCREEN_FSR_CALIBRATION = "Take your fingers off the LEDs";
+    screenCallibration();
+    int time_off2 = millis();
+    while(success || (millis() - time_off2) < 1000) {
+      success = calibrateDoubleString(note1, 0);
+    }
   }
 }
 
@@ -809,13 +858,6 @@ bool getSensorFeedback(int expectedChord)
   Serial.println(softPotADC3);
   delay(100);
   bool success = evaluateChord(expectedChord, softPotADC1, softPotADC2, softPotADC3);
-  /*
-  if(success)
-  {
-    delay(100);
-    success = evaluateChord(expectedChord, softPotADC[0], softPotADC[1], softPotADC[2]);
-  }
-  */
 
   if(success)
   {
@@ -836,12 +878,9 @@ bool evaluateChord(int expectedChord, int sensorValue1, int sensorValue2, int se
     // G chord
     case G_CHORD:
       if (abs(sensorValue1) == 0 && abs(sensorValue2 - calibratedSingleStringValues[1]) < TOL && abs(sensorValue3 - calibratedDoubleStringValues[3]) < TOL)
-      {
         return true;
-      }
       return false;
     // C chord
-    //TODO
     case C_CHORD:
       Serial.println(sensorValue3);
       if (abs(sensorValue1 - calibratedSingleStringValues[0]) < TOL && abs(sensorValue2 - calibratedSingleStringValues[2]) < TOL && abs(sensorValue3 - calibratedSingleStringValues[6]) < TOL)
@@ -870,47 +909,6 @@ bool evaluateChord(int expectedChord, int sensorValue1, int sensorValue2, int se
     default:
       return false;
   }
-  
-  /*
-  switch (expectedChord) {
-    // G chord
-    case G_CHORD:
-      if (abs(sensorValue1) == 0 && abs(sensorValue2 - softPotString_2[4]) < TOL && abs(sensorValue3 - ((softPotString_3[0] + softPotString_3[5]) / 2)) < TOL)
-      {
-        return true;
-      }
-      return false;
-    // C chord
-    //TODO
-    case C_CHORD:
-      Serial.println(sensorValue3);
-      if (abs(sensorValue1 - softPotString_1[1]) < TOL && abs(sensorValue2 - softPotString_2[1]) < TOL && abs(sensorValue3 - softPotString_3[1]) < TOL)
-        return true;
-      return false;
-    // D chord
-    case D_CHORD:
-      if (abs(sensorValue1) == 0 && abs(sensorValue2 - ((softPotString_2[0] + softPotString_2[2]) / 2)) < TOL && abs(sensorValue3 - softPotString_3[1]) < TOL)
-        return true;
-      return false;
-    // F chord
-    case F_CHORD:
-      if (abs(sensorValue1 - softPotString_1[1]) < TOL && abs(sensorValue2 - softPotString_2[2]) < TOL && abs(sensorValue3 - ( (softPotString_3[3] + softPotString_3[4]) / 2)) < TOL)
-        return true;
-      return false;
-    // Am Chord
-    case Am_CHORD:
-      if (abs(sensorValue1 - softPotString_1[1]) < TOL && abs(sensorValue2 - ((softPotString_2[2] + softPotString_2[3]) / 2)) < TOL && abs(sensorValue3) == 0)
-        return true;
-      return false;
-    // Em chord
-    case Em_CHORD:
-      if (abs(sensorValue1) == 0 && abs(sensorValue2 - ((softPotString_2[3] + softPotString_2[4]) / 2)) < TOL && abs(sensorValue3) == 0)
-        return true;
-      return false;
-    default:
-      return false;
-  }
-  */
 }
 
 void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensorValue3)
@@ -926,27 +924,26 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedSingleStringValues[1]) < TOL)
+      if(abs(sensorValue2 - calibratedSingleStringValues[1]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
-      if(abs(sensorValue3 - calibratedDoubleStringValues[3]) < TOL)
+      if(abs(sensorValue3 - calibratedDoubleStringValues[3]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
       }
       break;
     // C chord
-    //TODO
     case C_CHORD:
-      if(abs(sensorValue1 - calibratedSingleStringValues[0]) < TOL)
+      if(abs(sensorValue1 - calibratedSingleStringValues[0]) > TOL)
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedSingleStringValues[2]) < TOL)
+      if(abs(sensorValue2 - calibratedSingleStringValues[2]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
-      if(abs(sensorValue3 - calibratedSingleStringValues[6]) < TOL)
+      if(abs(sensorValue3 - calibratedSingleStringValues[6]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
         //Serial.println(softPotString_3[1]);
@@ -959,37 +956,37 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedDoubleStringValues[2]) < TOL)
+      if(abs(sensorValue2 - calibratedDoubleStringValues[2]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
-      if(abs(sensorValue3 - calibratedSingleStringValues[8]) < TOL)
+      if(abs(sensorValue3 - calibratedSingleStringValues[8]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
       }
       break;
     // F chord
     case F_CHORD:
-      if(abs(sensorValue1 - calibratedSingleStringValues[0]) < TOL)
+      if(abs(sensorValue1 - calibratedSingleStringValues[0]) > TOL)
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedSingleStringValues[3]) < TOL)
+      if(abs(sensorValue2 - calibratedSingleStringValues[3]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
-      if(abs(sensorValue3 - calibratedDoubleStringValues[4]) < TOL)
+      if(abs(sensorValue3 - calibratedDoubleStringValues[4]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
       }
       break;
     // Am Chord
     case Am_CHORD:
-      if(abs(sensorValue1 - calibratedSingleStringValues[0]) < TOL)
+      if(abs(sensorValue1 - calibratedSingleStringValues[0]) > TOL)
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedDoubleStringValues[1]) < TOL)
+      if(abs(sensorValue2 - calibratedDoubleStringValues[1]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
@@ -1004,7 +1001,7 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedDoubleStringValues[0]) < TOL)
+      if(abs(sensorValue2 - calibratedDoubleStringValues[0]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
@@ -1014,102 +1011,4 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       }
       break;
   }
-  
-  /*
-  switch(expectedChord) {
-    case G_CHORD:
-      if (abs(sensorValue1) != 0)
-      {
-        SCREEN_FEEDBACK = "Check the first fret";
-      }
-      if(abs(sensorValue2 - softPotString_2[4]) > TOL)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
-      }
-      if(abs(sensorValue3 - ((softPotString_3[0] + softPotString_3[5]) / 2)) > TOL)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
-      }
-      break;
-    // C chord
-    //TODO
-    case C_CHORD:
-      if (abs(sensorValue1 - softPotString_1[1]) > TOL)
-      {
-        SCREEN_FEEDBACK = "Check the first fret";
-      }
-      if(abs(sensorValue2 - softPotString_2[1]) > TOL)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
-      }
-      if(abs(sensorValue3 - softPotString_3[1]) > TOL)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
-        //Serial.println(softPotString_3[1]);
-        //Serial.println(sensorValue3);
-      }
-      break;
-    // D chord
-    case D_CHORD:
-      if (abs(sensorValue1) != 0)
-      {
-        SCREEN_FEEDBACK = "Check the first fret";
-      }
-      if(abs(sensorValue2 - ((softPotString_2[0] + softPotString_2[2]) / 2)) > TOL)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
-      }
-      if(abs(sensorValue3 - softPotString_3[1]) > TOL)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
-      }
-      break;
-    // F chord
-    case F_CHORD:
-      if (abs(sensorValue1 - softPotString_1[1]) > TOL)
-      {
-        SCREEN_FEEDBACK = "Check the first fret";
-      }
-      if(abs(sensorValue2 - softPotString_2[2]) > TOL)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
-      }
-      if(abs(sensorValue3 - ( (softPotString_3[3] + softPotString_3[4]) / 2)) > TOL)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
-      }
-      break;
-    // Am Chord
-    case Am_CHORD:
-      if (abs(sensorValue1 - softPotString_1[1]) > TOL)
-      {
-        SCREEN_FEEDBACK = "Check the first fret";
-      }
-      if(abs(sensorValue2 - ((softPotString_2[2] + softPotString_2[3]) / 2)) > TOL)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
-      }
-      if(abs(sensorValue3) != 0)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
-      }
-      break;
-    // Em chord
-    case Em_CHORD:
-      if (abs(sensorValue1) != 0)
-      {
-        SCREEN_FEEDBACK = "Check the first fret";
-      }
-      if(abs(sensorValue2 - ((softPotString_2[3] + softPotString_2[4]) / 2)) > TOL)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
-      }
-      if(abs(sensorValue3) != 0)
-      {
-        SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
-      }
-      break;
-  }
-  Serial.println(SCREEN_FEEDBACK);
-  */
 }
