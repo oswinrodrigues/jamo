@@ -38,6 +38,9 @@ const int SCREEN_MENU_BACK = 1;
 String SCREEN_FEEDBACK = "";
 
 void setup(){
+  // debug code
+  Serial.begin(9600);
+  
   // led setup
   ledSetup();
   // screen setup
@@ -51,10 +54,7 @@ void setup(){
   screenInitialize();
   // fsr initialize
   // TODO: Remove delays!
-  // sensorInitialize();
-
-  // debug code
-  Serial.begin(9600);
+  //sensorInitialize();
 }
 
 void loop(){
@@ -123,7 +123,7 @@ void loop(){
     // collect sensor data about play
     // verify play correctness
     // TODO: Check why returning false positives
-    // played_correctly = getSensorFeedback(chord);
+    played_correctly = getSensorFeedback(chord);
     if (SCREEN_FEEDBACK != previous_feedback) {
       Serial.println("Enter feedback display logic");
       // give feedback about play
@@ -699,11 +699,11 @@ const int SOFT_POT_PIN_1 = A0;
 const int SOFT_POT_PIN_2 = A1;
 const int SOFT_POT_PIN_3 = A2;
 
-const int TOL = 45; // TODO: Verify this tolerance value
+const int TOL = 55; // TODO: Verify this tolerance value
 
-int calibratedSingleStringValues[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int calibratedSingleStringValues[] = {750, 300, 410, 600, 920, 200, 260, 360, 740, 900};
 // Array corresponds to {Em, Am, D, G, F}
-int calibratedDoubleStringValues[] = {0, 0, 0, 0, 0};
+int calibratedDoubleStringValues[] = {360, 460, 660, 700, 375};
 
 void sensorSetup()
 {
@@ -717,23 +717,28 @@ void sensorInitialize()
   // Calibrate all single notes
   for(int i = 0; i < 10; i++)
   {
-    bool success = false;
-    SCREEN_FSR_CALIBRATION = "Place your finger on LED #" + (i + 1);
+    bool success = false; 
+    int ledNumber = i + 1;
+    SCREEN_FSR_CALIBRATION = "Place your finger on LED #" + ledNumber;
     screenCallibration();
     // Turn on LED #i
     ledTurn(i, LED_ON);
+    while(!success) {
+      success = calibrateSingleString(i, true);
+    }
     int time_on = millis();
-    while(!success || (millis() - time_on) < 1000) {
-      success = calibrateSingleString(i);
+    while((millis() - time_on) < 500) {
+      success = calibrateSingleString(i, true);
     }
     // Turn off LED #i
     ledTurn(i, LED_OFF);
-    SCREEN_FSR_CALIBRATION = "Take your finger off LED #" + (i + 1);
+    SCREEN_FSR_CALIBRATION = "Take your finger off LED #" + ledNumber;
     screenCallibration();
     int time_off = millis();
-    while(success || (millis() - time_off) < 500) {
-      success = calibrateSingleString(i);
+    while(success || (millis() - time_off) < 1000) {
+      success = calibrateSingleString(i, false);
     }
+    Serial.println(calibratedSingleStringValues[i]);
   }
   // Calibrate all necessary intervals
   int note1 = -1;
@@ -763,9 +768,12 @@ void sensorInitialize()
     // Turn on LEDs #note1 and #note2
     ledTurn(note1, LED_ON);
     ledTurn(note2, LED_ON);
+    while(!success) {
+      success = calibrateDoubleString(note1, note2, true);
+    }
     int time_on2 = millis();
-    while(!success || (millis() - time_on2) < 2500) {
-      success = calibrateDoubleString(note1, note2);
+    while((millis() - time_on2) < 1000) {
+      success = calibrateSingleString(i, true);
     }
     // Turn off all LEDs
     ledTurnAll(LED_OFF);
@@ -773,12 +781,13 @@ void sensorInitialize()
     screenCallibration();
     int time_off2 = millis();
     while(success || (millis() - time_off2) < 1000) {
-      success = calibrateDoubleString(note1, 0);
+      success = calibrateDoubleString(note1, 0, false);
     }
+    Serial.println(calibratedDoubleStringValues[i]);
   }
 }
 
-bool calibrateSingleString(int noteNumber)
+bool calibrateSingleString(int noteNumber, bool record)
 {
   int softPotADC;
   if(noteNumber == 0)
@@ -797,11 +806,14 @@ bool calibrateSingleString(int noteNumber)
   {
     return false;
   }
-  calibratedSingleStringValues[noteNumber] = softPotADC;
+  if(record)
+  {
+    calibratedSingleStringValues[noteNumber] = softPotADC;
+  }
   return true;
 }
 
-bool calibrateDoubleString(int noteNumber1, int noteNumber2)
+bool calibrateDoubleString(int noteNumber1, int noteNumber2, bool record)
 {
   int softPotADC;
   
@@ -812,17 +824,20 @@ bool calibrateDoubleString(int noteNumber1, int noteNumber2)
     {
       return false;
     }
-    if(noteNumber1 == 1 && noteNumber2 == 2)
+    if(record)
     {
-      calibratedDoubleStringValues[0] = softPotADC;
-    }
-    else if(noteNumber1 == 2 && noteNumber2 == 3)
-    {
-      calibratedDoubleStringValues[1] = softPotADC;
-    }
-    else if(noteNumber1 == 3 && noteNumber2 == 4)
-    {
-      calibratedDoubleStringValues[2] = softPotADC;
+      if(noteNumber1 == 1 && noteNumber2 == 2)
+      {
+        calibratedDoubleStringValues[0] = softPotADC;
+      }
+      else if(noteNumber1 == 2 && noteNumber2 == 3)
+      {
+        calibratedDoubleStringValues[1] = softPotADC;
+      }
+      else if(noteNumber1 == 3 && noteNumber2 == 4)
+      {
+        calibratedDoubleStringValues[2] = softPotADC;
+      }
     }
     return true;
   }
@@ -833,13 +848,16 @@ bool calibrateDoubleString(int noteNumber1, int noteNumber2)
     {
       return false;
     }
-    if(noteNumber1 == 5 && noteNumber2 == 9)
+    if(record)
     {
-      calibratedDoubleStringValues[3] = softPotADC;
-    }
-    else if(noteNumber1 == 6 && noteNumber2 == 7)
-    {
-      calibratedDoubleStringValues[4] = softPotADC;
+      if(noteNumber1 == 5 && noteNumber2 == 9)
+      {
+        calibratedDoubleStringValues[3] = softPotADC;
+      }
+      else if(noteNumber1 == 6 && noteNumber2 == 7)
+      {
+        calibratedDoubleStringValues[4] = softPotADC;
+      }
     }
     return true;
   }
@@ -918,6 +936,7 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
   // 1. User has not placed fingers on any strings
   // 2. User has placed fingers on some of the correct notes
   // 3. User has placed fingers on incorrect notes
+  SCREEN_FEEDBACK = "";
   switch(expectedChord) {
     case G_CHORD:
       if(abs(sensorValue1) != 0)
