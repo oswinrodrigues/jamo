@@ -51,10 +51,10 @@ void setup(){
   // led initialize
   ledInitialize();
   // screen initialize
-  screenInitialize();
+  // screenInitialize();
   // fsr initialize
   // TODO: Remove delays!
-  //sensorInitialize();
+  // sensorInitialize();
 }
 
 void loop(){
