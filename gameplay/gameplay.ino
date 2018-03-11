@@ -332,9 +332,18 @@ const int SCREEN_MENU_RESELECT = 0;
 // Instructions to player for calibrating FSRs
 String SCREEN_FSR_CALIBRATION = "";
 // Instructions to player when chord displayed
-String SCREEN_INSTRUCTIONS = "";
-// Feedback to player after chord is played
-// String screen_feedback = "";
+String SCREEN_INSTRUCTIONS = "Place fingers where LEDs are lit";
+
+const int NUM_STRINGS = 6;
+const int SCREEN_PLAY_SYMBOLS[NUM_STRINGS][NUM_CHORDS] = {
+//  G    C    D    F    Am   Em
+  {2, -1, -1, -1, -1, 0}, // String 6 (E)
+  {1, 3, -1, -1, 0, 2}, // String 5 (A)
+  {0, 2, 0, 3, 2, 3}, // String 4 (D)
+  {0, 0, 1, 2, 3, 0}, // String 3 (G)
+  {0, 1, 3, 1, 1, 0}, // String 2 (B)
+  {3, 0, 2, 0, 0, 0}  // String 1 (E)
+};
 
 void screenSetup(){
   _screen_tft.begin();
