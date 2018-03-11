@@ -25,18 +25,16 @@ int key = -1;
 int key_chord = 0;
 
 const int POLL_DELAY = 100; // 0.1 seconds
-const int PLAY_LIMIT = 10000; // 10 seconds
-const int FEEDBACK_LIMIT = 3000; // 3 seconds
 
+const int NUM_FRETS = 3;
+bool feedback[NUM_FRETS] = {false, false, false};
 
 // unsigned long time_start = 0;
 // bool played_correctly = false;
 bool menu_pressed = true;
-String previous_feedback = "";
 bool back_pressed = false;
 
 const int SCREEN_MENU_BACK = 1;
-String screen_feedback = "";
 
 void setup(){
   // debug code
@@ -106,30 +104,40 @@ void loop(){
   unsigned long time_start = millis();
   // Serial.print("time_start is "); Serial.println(time_start);
   bool played_correctly = false;
+  bool previous_feedback[NUM_FRETS] = {false, false, false};
+  bool feedback_changed = false;
+  for (int fret = 0; fret < NUM_FRETS; fret++) {
+    feedback[fret] = false;
+  }
   // instruct how play is expected
   // Serial.print("Display chord screen "); Serial.println(chord);
   screenPlayChord(chord);
   // command chord to be played
   ledTurnOnChord(chord);
   // wait until play is complete
-  previous_feedback = "";
-  feedback_counter = 0;
   // Serial.println("Entering main while loop");
   while (!played_correctly && !menu_pressed) {
     // collect sensor data about play
     // verify play correctness
     // TODO: Check why returning false positives
     played_correctly = getSensorFeedback(chord);
-    if (screen_feedback != previous_feedback) {
+    for (int fret = 0; fret < NUM_FRETS; fret++) {
+      if (feedback[fret] != previous_feedback[fret]) {
+        feedback_changed = true;
+        break;
+      }
+    }
+    if (feedback_changed) {
       // Serial.println("Enter feedback display logic");
       // give feedback about play
-      screenGiveFeedback();
-      previous_feedback = screen_feedback;
-      // Serial.println("Delay for feedback reading");
-      delay(FEEDBACK_LIMIT);
-      feedback_counter += 1;
-      // Serial.println("Display chord again after feedback");
       screenPlayChord(chord);
+      Serial.print("Feedback changed to ");
+      for (int fret = 0; fret < NUM_FRETS; fret++) {
+        Serial.print(feedback[fret]);
+        previous_feedback[fret] = feedback[fret];
+      }
+      Serial.println();
+      feedback_changed = false;
     }
     menu_pressed = screenGetMenuPress();
     delay(POLL_DELAY);
@@ -688,7 +696,6 @@ void screenGiveFeedback(){
   // Message
   _screen_tft.setCursor(w/8, h/2);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println(screen_feedback);
 }
 
 /* * * * * * * * * * *
@@ -880,7 +887,9 @@ bool getSensorFeedback(int expectedChord)
 
   if(success)
   {
-    screen_feedback = "Good Job";
+    for (int fret = 0; fret < NUM_FRETS; fret++) {
+      feedback[fret] = true;
+    }
     // Serial.println("Good Job");
     return true;
   }
@@ -937,97 +946,148 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
   // 1. User has not placed fingers on any strings
   // 2. User has placed fingers on some of the correct notes
   // 3. User has placed fingers on incorrect notes
-  screen_feedback = "";
   switch(expectedChord) {
     case G_CHORD:
       if(abs(sensorValue1) != 0)
       {
-        screen_feedback = "Check the first fret";
+        feedback[0] = false;
+      }
+      else {
+        feedback[0] = true;
       }
       if(abs(sensorValue2 - calibratedSingleStringValues[1]) > TOL)
       {
-        screen_feedback = screen_feedback + "Check the second fret";
+        feedback[1] = false;
+      }
+      else {
+        feedback[1] = true;
       }
       if(abs(sensorValue3 - calibratedDoubleStringValues[3]) > TOL)
       {
-        screen_feedback = screen_feedback + "Check the third fret";
+        feedback[2] = false;
+      }
+      else {
+        feedback[2] = true;
       }
       break;
     // C chord
     case C_CHORD:
       if(abs(sensorValue1 - calibratedSingleStringValues[0]) > TOL)
       {
-        screen_feedback = "Check the first fret";
+        feedback[0] = false;
+      }
+      else {
+        feedback[0] = true;
       }
       if(abs(sensorValue2 - calibratedSingleStringValues[2]) > TOL)
       {
-        screen_feedback = screen_feedback + "Check the second fret";
+        feedback[1] = false;
+      }
+      else {
+        feedback[1] = true;
       }
       if(abs(sensorValue3 - calibratedSingleStringValues[6]) > TOL)
       {
-        screen_feedback = screen_feedback + "Check the third fret";
-        // Serial.println(softPotString_3[1]);
-        // Serial.println(sensorValue3);
+        feedback[2] = false;
+      }
+      else {
+        feedback[2] = true;
       }
       break;
     // D chord
     case D_CHORD:
       if(abs(sensorValue1) != 0)
       {
-        screen_feedback = "Check the first fret";
+        feedback[0] = false;
+      }
+      else {
+        feedback[0] = true;
       }
       if(abs(sensorValue2 - calibratedDoubleStringValues[2]) > TOL)
       {
-        screen_feedback = screen_feedback + "Check the second fret";
+        feedback[1] = false;
+      }
+      else {
+        feedback[1] = true;
       }
       if(abs(sensorValue3 - calibratedSingleStringValues[8]) > TOL)
       {
-        screen_feedback = screen_feedback + "Check the third fret";
+        feedback[2] = false;
+      }
+      else {
+        feedback[2] = true;
       }
       break;
     // F chord
     case F_CHORD:
       if(abs(sensorValue1 - calibratedSingleStringValues[0]) > TOL)
       {
-        screen_feedback = "Check the first fret";
+        feedback[0] = false;
+      }
+      else {
+        feedback[0] = true;
       }
       if(abs(sensorValue2 - calibratedSingleStringValues[3]) > TOL)
       {
-        screen_feedback = screen_feedback + "Check the second fret";
+        feedback[1] = false;
+      }
+      else {
+        feedback[1] = true;
       }
       if(abs(sensorValue3 - calibratedDoubleStringValues[4]) > TOL)
       {
-        screen_feedback = screen_feedback + "Check the third fret";
+        feedback[2] = false;
+      }
+      else {
+        feedback[2] = true;
       }
       break;
     // Am Chord
     case Am_CHORD:
       if(abs(sensorValue1 - calibratedSingleStringValues[0]) > TOL)
       {
-        screen_feedback = "Check the first fret";
+        feedback[0] = false;
+      }
+      else {
+        feedback[0] = true;
       }
       if(abs(sensorValue2 - calibratedDoubleStringValues[1]) > TOL)
       {
-        screen_feedback = screen_feedback + "Check the second fret";
+        feedback[1] = false;
+      }
+      else {
+        feedback[1] = true;
       }
       if(abs(sensorValue3) != 0)
       {
-        screen_feedback = screen_feedback + "Check the third fret";
+        feedback[2] = false;
+      }
+      else {
+        feedback[2] = true;
       }
       break;
     // Em chord
     case Em_CHORD:
       if(abs(sensorValue1) != 0)
       {
-        screen_feedback = "Check the first fret";
+        feedback[0] = false;
+      }
+      else {
+        feedback[0] = true;
       }
       if(abs(sensorValue2 - calibratedDoubleStringValues[0]) > TOL)
       {
-        screen_feedback = screen_feedback + "Check the second fret";
+        feedback[1] = false;
+      }
+      else {
+        feedback[1] = true;
       }
       if(abs(sensorValue3) != 0)
       {
-        screen_feedback = screen_feedback + "Check the third fret";
+        feedback[2] = false;
+      }
+      else {
+        feedback[2] = true;
       }
       break;
   }
