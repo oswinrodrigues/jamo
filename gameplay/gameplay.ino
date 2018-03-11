@@ -365,7 +365,7 @@ void screenInitialize(){
   screenCallibration();
 }
 
-void introductionScreen(String str) {
+void introductionScreen() {
   int w = _screen_tft.width();
   int h = _screen_tft.height();
   _screen_tft.fillScreen(ILI9341_WHITE);
@@ -378,7 +378,7 @@ void introductionScreen(String str) {
   // Message
   _screen_tft.setCursor(w/8, h/2);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println(str);
+  _screen_tft.println(SCREEN_INSTRUCTIONS);
 }
 
 void screenCallibration(){
