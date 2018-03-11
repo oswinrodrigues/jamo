@@ -44,14 +44,16 @@ void setup() {
   delay(1000);
   selectModeScreen();
   
-  delay(1000);
-  chordModeScreen();
+//  delay(1000);
+//  chordModeScreen();
   
 //  delay(1000);
 //  keyModeScreen();
 //
 //  delay(1000);
 //  playScreen("C", "Place fingers where LEDs indicate");
+  delay(1000);
+  playScreenV2(1, true, true, false);
 //
 //  delay(1000);
 //  menuScreen();
@@ -72,8 +74,8 @@ void loop() {
 //  }
 
 
-  //String pls = getModeSelect();
-  String pls = getChord();
+  String pls = getModeSelect();
+  //String pls = getChord();
   //String pls = getKey();
   //String pls = getPlayScreenMenu();
   //String pls = getMenuOption();
@@ -85,6 +87,22 @@ void loop() {
   }
   
   delay(100);
+}
+
+void introductionScreen(String str) {
+  int w = tft.width();
+  int h = tft.height();
+  tft.fillScreen(ILI9341_WHITE);
+  
+  // Title 
+  tft.setCursor(w/8, 0);
+  tft.setTextColor(ILI9341_BLACK);  tft.setTextSize(3);
+  tft.println("Introduction");
+
+  // Message
+  tft.setCursor(w/8, h/2);
+  tft.setTextColor(ILI9341_BLACK);  tft.setTextSize(2);
+  tft.println(str);
 }
 
 void callibrationScreen(String str) {
@@ -345,7 +363,6 @@ String getPlayScreenMenu() {
   return button;
 }
 
-
 void playScreen(String chord, String instructions) {
   int w = tft.width();
   int h = tft.height();
@@ -360,6 +377,49 @@ void playScreen(String chord, String instructions) {
   tft.setCursor(w/8, h/2);
   tft.setTextColor(ILI9341_BLACK);  tft.setTextSize(2);
   tft.println(instructions);
+
+  // Menu Box
+  tft.fillRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_MAGENTA);
+  tft.drawRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_WHITE);
+  tft.setCursor((3*w/4+20), (h/16));
+  tft.setTextColor(ILI9341_BLACK);  tft.setTextSize(2);
+  tft.println("MENU");
+}
+
+void playScreenV2(int chord, bool f1, bool f2, bool f3) {
+  int w = tft.width();
+  int h = tft.height();
+  tft.fillScreen(ILI9341_WHITE);
+  
+  // Title 
+  tft.setCursor(w/2, 0);
+  tft.setTextColor(ILI9341_BLACK);  tft.setTextSize(5);
+  tft.println(chord);
+
+  // Fret Boxes
+  bool fret_feedback[3] = {f1, f2, f3}; 
+  for (int i = 2; i >= 0; i--)
+  {
+    if (fret_feedback[i] == true) {
+      tft.fillRoundRect(((w/8)+3*i*w/16), (h/3), (3*w/16), (h/2), 2, ILI9341_GREEN);
+    } else {
+      tft.fillRoundRect(((w/8)+3*i*w/16), (h/3), (3*w/16), (h/2), 2, ILI9341_RED);
+    }
+    tft.drawRoundRect(((w/8)+3*i*w/16), (h/3), (3*w/16), (h/2), 2, ILI9341_BLACK);
+    tft.setCursor(((w/8)+(3*i*w/16)+(3*w/16)/2), ((h/3)+(h/2)/2));
+    tft.setTextColor(ILI9341_BLACK);  tft.setTextSize(3);
+    tft.println(String((3-i)));
+  }
+  // Guitar Head
+  for (int i = 0; i < 6; i++)
+  {
+    tft.fillRoundRect(((w/8)+(3*3*w/16)), ((h/3)+i*(h/12)), (h/12), (h/12), 2, ILI9341_WHITE);
+    tft.drawRoundRect(((w/8)+(3*3*w/16)), ((h/3)+i*(h/12)), (h/12), (h/12), 2, ILI9341_BLACK);
+    tft.setCursor(((w/8)+(3*3*w/16)+2), (((h/3)+i*(h/12))+2));
+    tft.setTextColor(ILI9341_BLACK);  tft.setTextSize(2);
+    tft.println(String(i));
+
+  }
 
   // Menu Box
   tft.fillRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_MAGENTA);
