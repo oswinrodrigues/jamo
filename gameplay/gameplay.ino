@@ -1,5 +1,8 @@
+// TODO: Change to enums? defines?
+
 const int CHORD_MODE = 0;
 const int KEY_MODE = 1;
+int mode = -1;
 
 const int G_CHORD = 0;
 const int C_CHORD = 1;
@@ -8,31 +11,29 @@ const int F_CHORD = 3;
 const int Am_CHORD = 4;
 const int Em_CHORD = 5;
 const int NUM_CHORDS = 6;
+int chord = -1;
 
 const int G_KEY = 0;
 const int C_KEY = 1;
 const int NUM_KEYS = 2;
-
 const int NUM_CHORDS_IN_KEY = 4;
 const int KEY_CHORDS[NUM_KEYS][NUM_CHORDS_IN_KEY] = {
   {G_CHORD, C_CHORD, D_CHORD, Em_CHORD}, // G_KEY
   {C_CHORD, F_CHORD, G_CHORD, Am_CHORD}  // C_KEY
 };
+int key = -1;
+int key_chord = 0;
 
 const int POLL_DELAY = 100; // 0.1 seconds
 const int PLAY_LIMIT = 10000; // 10 seconds
 const int FEEDBACK_LIMIT = 3000; // 3 seconds
 
-unsigned long time_start = 0;
-bool back_pressed = false;
-int mode = -1;
-int chord = -1;
-int key = -1;
-int key_chord_counter = 0;
+
+// unsigned long time_start = 0;
+// bool played_correctly = false;
 bool menu_pressed = true;
-bool played_correctly = false;
-int feedback_counter = 0;
 String previous_feedback = "";
+bool back_pressed = false;
 
 const int SCREEN_MENU_BACK = 1;
 String screen_feedback = "";
@@ -73,8 +74,6 @@ void loop(){
       // Serial.println("Got mode");
     }
 
-    back_pressed = false;
-
     // if chord mode, chord prompt
     if (mode == CHORD_MODE){
       // Serial.println("Enter chord prompt logic");
@@ -95,31 +94,28 @@ void loop(){
         key = screenGetKey();
         delay(POLL_DELAY);
       }
+      key_chord = 0;
       // Serial.println("Got key");
-      chord = KEY_CHORDS[key][key_chord_counter];
+      chord = KEY_CHORDS[key][key_chord];
     }
   }
 
   // main logic for chord-playing:
+  // Serial.println("Reset all variables");
+  menu_pressed = false;
+  unsigned long time_start = millis();
+  // Serial.print("time_start is "); Serial.println(time_start);
+  bool played_correctly = false;
   // instruct how play is expected
-
   // Serial.print("Display chord screen "); Serial.println(chord);
   screenPlayChord(chord);
   // command chord to be played
-  // TODO: WHY ON GOD'S GREEN EARTH IS THIS A PROBLEM?
   ledTurnOnChord(chord);
-
   // wait until play is complete
-  // Serial.println("Reset all variables");
-  time_start = millis();
-  // Serial.print("time_start is "); Serial.println(time_start);
-  played_correctly = false;
-  menu_pressed = false;
   previous_feedback = "";
   feedback_counter = 0;
-
   // Serial.println("Entering main while loop");
-  while (((millis() - time_start) <= (PLAY_LIMIT + feedback_counter * FEEDBACK_LIMIT)) && (!played_correctly) && (!menu_pressed)) {
+  while (!played_correctly && !menu_pressed) {
     // collect sensor data about play
     // verify play correctness
     // TODO: Check why returning false positives
@@ -136,21 +132,23 @@ void loop(){
       screenPlayChord(chord);
     }
     menu_pressed = screenGetMenuPress();
+    delay(POLL_DELAY);
   }
   // Serial.println("Exited main while loop");
-  // Serial.print("Duration check is "); Serial.println(PLAY_LIMIT + feedback_counter * FEEDBACK_LIMIT);
-  // Serial.print("Elapsed duration is "); Serial.println(millis() - time_start);
   // Serial.print("played_correctly is "); Serial.println(played_correctly);
   // Serial.print("menu_pressed is "); Serial.println(menu_pressed);
 
-  // if play is unacceptable, loop back to same chord
-  // else if play is good, next chord in sequence
+  // if play is good, next chord in sequence
   if (played_correctly) {
     // Serial.println("Enter played_correctly handling logic");
     if (mode == KEY_MODE) {
       // Serial.println("Since key mode, increment chord");
-      key_chord_counter += 1 ;
-      chord = KEY_CHORDS[key][key_chord_counter];
+      key_chord += 1 ;
+      if (key_chord == NUM_CHORDS_IN_KEY) {
+        // Serial.println("Reached end of key sequence; repeat");
+        key_chord = 0;
+      }
+      chord = KEY_CHORDS[key][key_chord];
     }
   }
 
@@ -169,6 +167,9 @@ void loop(){
       back_pressed = true;
     }
     // else if 'change  mode' pressed, loop back to mode prompt
+    else {
+      back_pressed = false;
+    }
   }
 }
 
@@ -208,19 +209,19 @@ bool led[LED_NUM_LEDS];       // total registers that are used
  * [1, 2]       for Em_CHORD
  */
 
-const int LED_MAX_LEDS_FOR_CHORD = 4;
+const int LED_MAX_LEDS_FOR_CHORD = 3;
 
 // For following, consider using a struct instead that has the
 // chord name, led indices and number of leds too
 
 const int LED_CHORD_LED_MAPPING[NUM_CHORDS][LED_MAX_LEDS_FOR_CHORD] = {
   // Use -1 as flag to skip, since not a valid led[] index
-  {1, 5, 9, -1}, // G_CHORD
-  {0, 2, 6, -1}, // C_CHORD
-  {3, 4, 8, -1}, // D_CHORD
-  {0, 3, 6, 7},  // F_CHORD
-  {0, 2, 3, -1}, // Am_CHORD
-  {1, 2, -1, -1} // Em_CHORD
+  {1, 5, 9}, // G_CHORD
+  {0, 2, 6}, // C_CHORD
+  {3, 4, 8}, // D_CHORD
+  {0, 3, 7},  // F_CHORD
+  {0, 2, 3}, // Am_CHORD
+  {1, 2, -1,} // Em_CHORD
 };
 
 void ledSetup(){
