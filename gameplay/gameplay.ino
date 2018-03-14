@@ -112,7 +112,8 @@ void loop(){
   // instruct how play is expected
   // Serial.print("Display chord screen "); Serial.println(chord);
   //screenPlayChord(chord);
-  screenPlayChordV2(chord);
+  bool play_screen_active = true;
+  screenPlayChordV2(chord, play_screen_active);
   // command chord to be played
   ledTurnOnChord(chord);
   // wait until play is complete
@@ -131,7 +132,7 @@ void loop(){
     if (feedback_changed) {
       // Serial.println("Enter feedback display logic");
       // give feedback about play
-      screenPlayChordV2(chord);
+      screenPlayChordV2(chord, play_screen_active);
       Serial.print("Feedback changed to ");
       for (int fret = 0; fret < NUM_FRETS; fret++) {
         Serial.print(feedback[fret]);
@@ -638,7 +639,7 @@ void screenPlayChord(int chord){
   _screen_tft.println("MENU");
 }
 
-void screenPlayChordV2(int chord) {
+void screenPlayChordV2(int chord, bool play_screen_active) {
   String chord_string = "";
   switch (chord){
     case G_CHORD: chord_string = "G";   break;
@@ -652,8 +653,11 @@ void screenPlayChordV2(int chord) {
 
   int w = _screen_tft.width();
   int h = _screen_tft.height();
-  _screen_tft.fillScreen(ILI9341_WHITE);
-  
+  // If play screen is already active do not repaint screen white
+  if (!play_screen_active) {
+    _screen_tft.fillScreen(ILI9341_WHITE);
+  } //else: do nothing
+
   // Title 
   _screen_tft.setCursor(w/2, 0);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(5);
