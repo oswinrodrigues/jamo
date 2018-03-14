@@ -49,7 +49,10 @@ void setup(){
 
   // led initialize
   ledInitialize();
-  // screen initialize
+  
+  // screen introduction/initialization
+  introductionScreen();
+  delay(5000);
   // screenInitialize();
   // fsr initialize
   // TODO: Remove delays!
