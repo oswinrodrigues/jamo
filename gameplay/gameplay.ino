@@ -115,8 +115,7 @@ void loop(){
   // instruct how play is expected
   // Serial.print("Display chord screen "); Serial.println(chord);
   //screenPlayChord(chord);
-  bool play_screen_active = true;
-  screenPlayChordV2(chord, play_screen_active);
+  screenPlayChordV2(chord, 0);
   // command chord to be played
   ledTurnOnChord(chord);
   // wait until play is complete
@@ -135,7 +134,7 @@ void loop(){
     if (feedback_changed) {
       // Serial.println("Enter feedback display logic");
       // give feedback about play
-      screenPlayChordV2(chord, play_screen_active);
+      screenPlayChordV2(chord, 1);
       Serial.print("Feedback changed to ");
       for (int fret = 0; fret < NUM_FRETS; fret++) {
         Serial.print(feedback[fret]);
@@ -642,7 +641,7 @@ void screenPlayChord(int chord){
   _screen_tft.println("MENU");
 }
 
-void screenPlayChordV2(int chord, bool play_screen_active) {
+void screenPlayChordV2(int chord, bool update_feedback) {
   String chord_string = "";
   switch (chord){
     case G_CHORD: chord_string = "G";   break;
@@ -657,7 +656,7 @@ void screenPlayChordV2(int chord, bool play_screen_active) {
   int w = _screen_tft.width();
   int h = _screen_tft.height();
   // If play screen is already active do not repaint screen white
-  if (!play_screen_active) {
+  if (!update_feedback) {
     _screen_tft.fillScreen(ILI9341_WHITE);
   } //else: do nothing
 
@@ -667,27 +666,29 @@ void screenPlayChordV2(int chord, bool play_screen_active) {
   _screen_tft.println(chord_string);
 
   // Fret Boxes
-  for (int i = 2; i >= 0; i--)
-  {
-    if (feedback[2-i] == true) {
-      _screen_tft.fillRoundRect(((w/8)+3*i*w/16), (h/3), (3*w/16), (h/2), 2, ILI9341_GREEN);
-    } else {
-      _screen_tft.fillRoundRect(((w/8)+3*i*w/16), (h/3), (3*w/16), (h/2), 2, ILI9341_RED);
+  if(update_feedback) {
+    for (int i = 2; i >= 0; i--)
+    {
+      if (feedback[2-i] == true) {
+        _screen_tft.fillRoundRect(((w/8)+3*i*w/16), (h/3), (3*w/16), (h/2), 2, ILI9341_GREEN);
+      } else {
+        _screen_tft.fillRoundRect(((w/8)+3*i*w/16), (h/3), (3*w/16), (h/2), 2, ILI9341_RED);
+      }
+      _screen_tft.drawRoundRect(((w/8)+3*i*w/16), (h/3), (3*w/16), (h/2), 2, ILI9341_BLACK);
+      _screen_tft.setCursor(((w/8)+(3*i*w/16)+(3*w/16)/2), ((h/3)+(h/2)/2));
+      _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
+      _screen_tft.println(String((3-i)));
     }
-    _screen_tft.drawRoundRect(((w/8)+3*i*w/16), (h/3), (3*w/16), (h/2), 2, ILI9341_BLACK);
-    _screen_tft.setCursor(((w/8)+(3*i*w/16)+(3*w/16)/2), ((h/3)+(h/2)/2));
-    _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
-    _screen_tft.println(String((3-i)));
-  }
-  // Guitar Head
-  for (int i = 0; i < 6; i++)
-  {
-    _screen_tft.fillRoundRect(((w/8)+(3*3*w/16)), ((h/3)+i*(h/12)), (h/12), (h/12), 2, ILI9341_WHITE);
-    _screen_tft.drawRoundRect(((w/8)+(3*3*w/16)), ((h/3)+i*(h/12)), (h/12), (h/12), 2, ILI9341_BLACK);
-    _screen_tft.setCursor(((w/8)+(3*3*w/16)+2), (((h/3)+i*(h/12))+2));
-    _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-    _screen_tft.println(String(SCREEN_PLAY_SYMBOLS_CHAR[i][chord]));
+    // Guitar Head
+    for (int i = 0; i < 6; i++)
+    {
+      _screen_tft.fillRoundRect(((w/8)+(3*3*w/16)), ((h/3)+i*(h/12)), (h/12), (h/12), 2, ILI9341_WHITE);
+      _screen_tft.drawRoundRect(((w/8)+(3*3*w/16)), ((h/3)+i*(h/12)), (h/12), (h/12), 2, ILI9341_BLACK);
+      _screen_tft.setCursor(((w/8)+(3*3*w/16)+2), (((h/3)+i*(h/12))+2));
+      _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
+      _screen_tft.println(String(SCREEN_PLAY_SYMBOLS_CHAR[i][chord]));
 
+    }
   }
 
   // Menu Box
