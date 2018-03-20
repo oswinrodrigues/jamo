@@ -38,6 +38,7 @@ const int SCREEN_MENU_BACK = 1;
 const int INSTRUCTION_INTRODUCTION = 1;
 const int INSTRUCTION_PLAYSCREEN = 2;
 bool instruction_complete = false;
+bool played_correctly = false; //Needed to make global s.t. it can be used to give user chance to strum
 
 void setup(){
   // debug code
@@ -116,7 +117,7 @@ void loop(){
   menu_pressed = false;
   unsigned long time_start = millis();
   // Serial.print("time_start is "); Serial.println(time_start);
-  bool played_correctly = false;
+  played_correctly = false;
   bool previous_feedback[NUM_FRETS] = {false, false, false};
   bool feedback_changed = false;
   for (int fret = 0; fret < NUM_FRETS; fret++) {
@@ -659,40 +660,6 @@ int screenGetKey(){
   }
 
   return -1;
-}
-
-void screenPlayChord(int chord){
-  String chord_string = "";
-  switch (chord){
-    case G_CHORD: chord_string = "G";   break;
-    case C_CHORD: chord_string = "C";   break;
-    case D_CHORD: chord_string = "D";   break;
-    case F_CHORD: chord_string = "F";   break;
-    case Am_CHORD: chord_string = "Am"; break;
-    case Em_CHORD: chord_string = "Em"; break;
-    default: chord_string = "Unknown";  break;
-  }
-
-  int w = _screen_tft.width();
-  int h = _screen_tft.height();
-  _screen_tft.fillScreen(ILI9341_WHITE);
-  
-  // Title 
-  _screen_tft.setCursor(w/2, 0);
-  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(5);
-  _screen_tft.println(chord_string);
-
-  // Message
-  _screen_tft.setCursor(w/8, h/2);
-  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println(SCREEN_INSTRUCTIONS);
-
-  // Menu Box
-  _screen_tft.fillRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_MAGENTA);
-  _screen_tft.drawRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_WHITE);
-  _screen_tft.setCursor((3*w/4+20), (h/16));
-  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println("MENU");
 }
 
 void screenPlayChordV2(int chord, bool update_feedback) {
