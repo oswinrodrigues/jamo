@@ -88,6 +88,10 @@ void loop(){
     }
     // else if key mode, key prompt
     else if (mode == KEY_MODE){
+      //Wait 3 Seconds, as per instructions for user to play
+      if(played_correctly) {
+        delay(3000);  
+      }  
       // Serial.println("Enter key prompt logic");
       screenSelectKey();
       key = -1;
