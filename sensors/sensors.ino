@@ -16,7 +16,10 @@ int softPotString_3[] = {0, 730, 0, 0, 0, 0};
 <<<<<<< HEAD
 int calibratedSingleStringValues[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 // Array corresponds to {Em, Am, D, G, F}
-int calibratedDoubleStringValues[] = {0, 0, 0, 0, 0};
+int calibratedGStringValue = 0;
+int calibratedDStringValues[] = {0, 0};
+int calibratedEmStringValues[] = {0, 0};
+int calibratedAmStringValues[] = {0, 0};
 
 =======
 >>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
@@ -63,6 +66,7 @@ void sensorSetup()
   pinMode(SOFT_POT_PIN_1, INPUT);
   pinMode(SOFT_POT_PIN_2, INPUT);
   pinMode(SOFT_POT_PIN_3, INPUT);
+  pinMode(SOFT_POT_PIN_4, INPUT);
 }
 
 <<<<<<< HEAD
@@ -219,9 +223,10 @@ bool getSensorFeedback(int expectedChord)
   int softPotADC1 = analogRead(SOFT_POT_PIN_1);
   int softPotADC2 = analogRead(SOFT_POT_PIN_2);
   int softPotADC3 = analogRead(SOFT_POT_PIN_3);
+  int softPotADC4 = analogRead(SOFT_POT_PIN_4);
   Serial.println(softPotADC3);
   delay(100);
-  bool success = evaluateChord(expectedChord, softPotADC1, softPotADC2, softPotADC3);
+  bool success = evaluateChord(expectedChord, softPotADC1, softPotADC2, softPotADC3, softPotADC4);
   /*
   if(success)
   {
@@ -238,12 +243,12 @@ bool getSensorFeedback(int expectedChord)
   }
   else
   {
-    findError(expectedChord, softPotADC1, softPotADC2, softPotADC3);
+    findError(expectedChord, softPotADC1, softPotADC2, softPotADC3, softPotADC4);
     return false;
   }
 }
 
-bool evaluateChord(int expectedChord, int sensorValue1, int sensorValue2, int sensorValue3)
+bool evaluateChord(int expectedChord, int sensorValue1, int sensorValue2, int sensorValue3, int sensorValue4)
 {
   switch (expectedChord) {
     // G chord
@@ -332,7 +337,7 @@ bool evaluateChord(int expectedChord, int sensorValue1, int sensorValue2, int se
 >>>>>>> b5cc53d4517e58ea79cfcb2b23c410db03315b47
 }
 
-void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensorValue3)
+void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensorValue3, int sensorValue4)
 {
   // Go through every case for each possible chord
   // Three cases:
@@ -350,7 +355,7 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
-      if(abs(sensorValue3 - calibratedDoubleStringValues[3]) > TOL)
+      if(abs(sensorValue3 - calibratedGStringValue) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the third fret";
       }
@@ -379,7 +384,7 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedDoubleStringValues[2]) > TOL)
+      if(abs(sensorValue2 - calibratedDStringValues[0]) > TOL || abs(sensorValue4 - calibratedDStringValues[1]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
@@ -409,7 +414,7 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedDoubleStringValues[1]) > TOL)
+      if(abs(sensorValue2 - calibratedAmStringValues[0]) > TOL || abs(sensorValue4 - calibratedAmStringValues[1]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
@@ -424,7 +429,7 @@ void findError(int expectedChord, int sensorValue1, int sensorValue2, int sensor
       {
         SCREEN_FEEDBACK = "Check the first fret";
       }
-      if(abs(sensorValue2 - calibratedDoubleStringValues[0]) > TOL)
+      if(abs(sensorValue2 - calibratedEmStringValues[0]) > TOL || abs(sensorValue4 - calibratedEmStringValues[1]) > TOL)
       {
         SCREEN_FEEDBACK = SCREEN_FEEDBACK + "Check the second fret";
       }
