@@ -35,6 +35,9 @@ bool menu_pressed = true;
 bool back_pressed = false;
 
 const int SCREEN_MENU_BACK = 1;
+const int INSTRUCTION_INTRODUCTION = 1;
+const int INSTRUCTION_PLAYSCREEN = 2;
+bool instruction_complete = false;
 
 void setup(){
   // debug code
@@ -51,7 +54,10 @@ void setup(){
   ledInitialize();
   
   // screen introduction/initialization
-  introductionScreen();
+  instructionScreen(INSTRUCTION_INTRODUCTION);
+  while(!screenGetNextPress()) {
+    //Wait till next is pressed
+  }
   delay(5000);
   // screenInitialize();
   // fsr initialize
@@ -116,9 +122,16 @@ void loop(){
   for (int fret = 0; fret < NUM_FRETS; fret++) {
     feedback[fret] = false;
   }
-  // instruct how play is expected
   // Serial.print("Display chord screen "); Serial.println(chord);
-  //screenPlayChord(chord);
+  
+  // instruct how play is expected, only on first pass
+  if (!instruction_complete) { 
+    instructionScreen(INSTRUCTION_PLAYSCREEN);
+    while(!screenGetNextPress()) {
+      //Wait till next is pressed
+    }
+    instruction_complete = true;
+  }
   screenPlayChordV2(chord, 0);
   // command chord to be played
   ledTurnOnChord(chord);
@@ -339,8 +352,9 @@ const int SCREEN_MENU_RESELECT = 0;
 // The following strings can be edited as required
 // Instructions to player for calibrating FSRs
 String SCREEN_FSR_CALIBRATION = "";
-// Instructions to player when chord displayed
-String SCREEN_INSTRUCTIONS = "Place fingers where LEDs are lit";
+// Instructions to player
+String SCREEN_INSTRUCTION_INTRODUCTION = "CHORD mode = pick chords to play \n KEY mode = play chords with subset of key \n In KEY mode correct finger placement sets of 3s timer in which chord must be played";
+String SCREEN_INSTRUCTION_PLAYSCREEN = "Place finger where LEDs indicate. Frets update when correct. Fingering shown to the right. X = no strum. O = open strum. # = fingering";
 
 const int NUM_STRINGS = 6;
 const int SCREEN_PLAY_SYMBOLS[NUM_STRINGS][NUM_CHORDS] = {
@@ -372,7 +386,7 @@ void screenInitialize(){
   screenCallibration();
 }
 
-void introductionScreen() {
+void instructionScreen(int INSTRUCTION) {
   int w = _screen_tft.width();
   int h = _screen_tft.height();
   _screen_tft.fillScreen(ILI9341_WHITE);
@@ -383,10 +397,46 @@ void introductionScreen() {
   _screen_tft.println("Introduction");
 
   // Message
-  _screen_tft.setCursor(w/8, h/2);
+  _screen_tft.setCursor(0, h/3);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println(SCREEN_INSTRUCTIONS);
+  if (INSTRUCTION == INSTRUCTION_INTRODUCTION)
+    _screen_tft.println(SCREEN_INSTRUCTION_INTRODUCTION);
+  else
+    _screen_tft.println(SCREEN_INSTRUCTION_PLAYSCREEN);
+  
+  // Next Box
+  _screen_tft.fillRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_MAGENTA);
+  _screen_tft.drawRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_WHITE);
+  _screen_tft.setCursor((3*w/4+20), (h/16));
+  _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
+  _screen_tft.println("MENU");
 }
+
+bool screenGetNextPress(){
+  // Box Info
+  int w = _screen_tft.width();
+  int h = _screen_tft.height();
+  // Menu Box
+  int x_starting_spot = 3*(w/4);
+  int y_starting_spot = 0;
+  // Box Dimensions
+  int box_width = (w/4);
+  int box_height = (h/3);
+
+  // Get Point Instance
+  TSPoint p = _screen_ts.getPoint();
+  // Rotation and Conversion and Calibration
+  double y = double(p.x)*double(h)/1024;
+  double x = 320 - double(p.y)*double(w)/1024;
+  
+  // Determine Selected Mode
+  if (x > x_starting_spot && x < x_starting_spot + box_width && y > y_starting_spot && y < y_starting_spot + box_height && p.z > 0){
+    return true;
+  }
+
+  return false;
+}
+
 
 void screenCallibration(){
   int w = _screen_tft.width();
@@ -794,7 +844,7 @@ void screenGiveFeedback(){
   _screen_tft.println("Feedback");
 
   // Message
-  _screen_tft.setCursor(w/8, h/2);
+  _screen_tft.setCursor(0, h/2);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
 }
 
