@@ -410,7 +410,7 @@ void instructionScreen(int INSTRUCTION) {
   _screen_tft.drawRoundRect((3*w/4), 0, (w/4), (h/4), 10, ILI9341_WHITE);
   _screen_tft.setCursor((3*w/4+20), (h/16));
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(2);
-  _screen_tft.println("MENU");
+  _screen_tft.println("Next");
 }
 
 bool screenGetNextPress(){
