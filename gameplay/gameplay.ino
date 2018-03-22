@@ -835,11 +835,11 @@ const int SOFT_POT_PIN_2 = A1;
 const int SOFT_POT_PIN_3 = A2;
 const int SOFT_POT_PIN_4 = A3;
 
-const int TOL = 55; // TODO: Verify this tolerance value
+const int TOL = 75; // TODO: Verify this tolerance value
 
-int calibratedSingleStringValues[] = {750, 280, 420, 530, 950, 200, 260, 380, 760, 920};
-int calibratedGStringValue = 660;
-int calibratedDStringValues[] = {950, 600};
+int calibratedSingleStringValues[] = {750, 280, 420, 530, 950, 200, 260, 380, 760, 910};
+int calibratedGStringValue = 910;
+int calibratedDStringValues[] = {870, 550};
 int calibratedEmStringValues[] = {370, 300};
 int calibratedAmStringValues[] = {500, 420};
 
