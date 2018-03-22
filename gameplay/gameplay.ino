@@ -12,6 +12,7 @@ const int Am_CHORD = 4;
 const int Em_CHORD = 5;
 const int NUM_CHORDS = 6;
 int chord = -1;
+int prev_chord = -2;
 
 const int G_KEY = 0;
 const int C_KEY = 1;
@@ -38,7 +39,10 @@ const int SCREEN_MENU_BACK = 1;
 const int INSTRUCTION_INTRODUCTION = 1;
 const int INSTRUCTION_PLAYSCREEN = 2;
 bool instruction_complete = false;
-bool played_correctly = false; //Needed to make global s.t. it can be used to give user chance to strum
+//Needed to make global s.t. it can be used to give user chance to strum
+bool played_correctly = false; 
+bool previous_feedback[NUM_FRETS] = {false, false, false};
+bool feedback_changed = false;
 
 void setup(){
   // debug code
@@ -59,7 +63,6 @@ void setup(){
   while(!screenGetNextPress()) {
     //Wait till next is pressed
   }
-  delay(5000);
   // screenInitialize();
   // fsr initialize
   // TODO: Remove delays!
@@ -69,6 +72,7 @@ void setup(){
 void loop(){
   // Serial.println("Enter main loop");
   if (menu_pressed) {
+    prev_chord = -2;
     // Serial.println("Enter prompt logic");
     if (!back_pressed){
       // Serial.println("Enter mode prompt logic");
@@ -95,10 +99,6 @@ void loop(){
     }
     // else if key mode, key prompt
     else if (mode == KEY_MODE){
-      //Wait 3 Seconds, as per instructions for user to play
-      if(played_correctly) {
-        delay(3000);  
-      }  
       // Serial.println("Enter key prompt logic");
       screenSelectKey();
       key = -1;
@@ -111,6 +111,10 @@ void loop(){
       chord = KEY_CHORDS[key][key_chord];
     }
   }
+  //Wait 3 Seconds, as per instructions for user to play in key mode
+  if(played_correctly && mode == KEY_MODE) {
+    delay(3000);  
+  }  
 
   // main logic for chord-playing:
   // Serial.println("Reset all variables");
@@ -118,10 +122,13 @@ void loop(){
   unsigned long time_start = millis();
   // Serial.print("time_start is "); Serial.println(time_start);
   played_correctly = false;
-  bool previous_feedback[NUM_FRETS] = {false, false, false};
-  bool feedback_changed = false;
-  for (int fret = 0; fret < NUM_FRETS; fret++) {
-    feedback[fret] = false;
+  if (mode == KEY_MODE) {
+    //[NUM_FRETS] = {false, false, false};
+    feedback_changed = false;
+    for (int fret = 0; fret < NUM_FRETS; fret++) {
+      previous_feedback[fret] = false;
+      feedback[fret] = false;
+    }
   }
   // Serial.print("Display chord screen "); Serial.println(chord);
   
@@ -133,7 +140,9 @@ void loop(){
     }
     instruction_complete = true;
   }
-  screenPlayChordV2(chord, 0);
+  if (chord != prev_chord)
+    screenPlayChordV2(chord, 0);
+    screenPlayChordV2(chord, 1);
   // command chord to be played
   ledTurnOnChord(chord);
   // wait until play is complete
@@ -170,6 +179,7 @@ void loop(){
 
   // if play is good, next chord in sequence
   if (played_correctly) {
+    prev_chord = chord;
     // Serial.println("Enter played_correctly handling logic");
     if (mode == KEY_MODE) {
       // Serial.println("Since key mode, increment chord");
@@ -354,8 +364,8 @@ const int SCREEN_MENU_RESELECT = 0;
 // Instructions to player for calibrating FSRs
 String SCREEN_FSR_CALIBRATION = "";
 // Instructions to player
-String SCREEN_INSTRUCTION_INTRODUCTION = "CHORD mode = pick chords to play \n KEY mode = play chords with subset of key \n In KEY mode correct finger placement sets of 3s timer in which chord must be played";
-String SCREEN_INSTRUCTION_PLAYSCREEN = "Place finger where LEDs indicate. Frets update when correct. Fingering shown to the right. X = no strum. O = open strum. # = fingering";
+String SCREEN_INSTRUCTION_INTRODUCTION = "CHORD mode = pick chords\nto play\nKEY mode = play chords\nwith subset of key\n\nIn KEY mode correct fingerplacement sets of 3s timerin which chord must be\nplayed";
+String SCREEN_INSTRUCTION_PLAYSCREEN = "Place finger where LEDs\nindicate. Frets update\nwhen correct. Fingering\nshown to the right.\nX = no strum.\nO = open strum.\n# = fingering";
 
 const int NUM_STRINGS = 6;
 const int SCREEN_PLAY_SYMBOLS[NUM_STRINGS][NUM_CHORDS] = {
@@ -393,9 +403,9 @@ void instructionScreen(int INSTRUCTION) {
   _screen_tft.fillScreen(ILI9341_WHITE);
   
   // Title 
-  _screen_tft.setCursor(w/8, 0);
+  _screen_tft.setCursor(0, 0);
   _screen_tft.setTextColor(ILI9341_BLACK);  _screen_tft.setTextSize(3);
-  _screen_tft.println("Introduction");
+  _screen_tft.println("Instructions");
 
   // Message
   _screen_tft.setCursor(0, h/3);
