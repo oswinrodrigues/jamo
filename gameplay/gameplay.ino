@@ -244,7 +244,7 @@ bool led[LED_NUM_LEDS];       // total registers that are used
  * [1, 5, 9]    for G_CHORD
  * [0, 2, 6]    for C_CHORD
  * [3, 4, 8]    for D_CHORD
- * [0, 3, 6, 7] for F_CHORD
+ * [0, 3, 7]    for F_CHORD
  * [0, 2, 3]    for Am_CHORD
  * [1, 2]       for Em_CHORD
  */
